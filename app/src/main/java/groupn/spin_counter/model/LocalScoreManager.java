@@ -103,6 +103,9 @@ class LocalScoreManager extends ScoreManager {
         gamesPlayed += 1;
         gamesWon += won ? 1 : 0;
 
+        userInfo.put (GamesPlayedKey, gamesPlayed);
+        userInfo.put (GamesWonKey, gamesWon);
+
         return true;
     }
 
