@@ -90,7 +90,7 @@ public abstract class ScoreManager {
      * @param user
      * @return the number of games user has lost. Note: this is the same as (getGamesPlayed() - getGamesWon())
      */
-    public final int getGamesList (String user) {
+    public final int getGamesLost (String user) {
         return getGamesPlayed (user) - getGamesWon (user);
     }
 
