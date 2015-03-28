@@ -1,5 +1,7 @@
 package groupn.spin_counter.model;
 
+import android.content.Context;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -94,6 +96,13 @@ public abstract class ScoreManager {
         return getGamesPlayed (user) - getGamesWon (user);
     }
 
+    /**
+     *
+     * @return the context used by the ScoreManager. This probably needs to be set before calling any methods
+     */
+    public final Context getContext () { return context; }
+    public final void setContext (Context context) { this.context = context; }
+
     // ============
     //
     // Private
@@ -101,6 +110,7 @@ public abstract class ScoreManager {
     // ============
 
     private final static Map<Type,ScoreManager> instances = new HashMap<Type,ScoreManager> ();
+    private Context context;
 
     static {
         instances.put (Type.Local, new LocalScoreManager());

@@ -1,5 +1,8 @@
 package groupn.spin_counter.model;
 
+import android.util.Log;
+
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -14,72 +17,34 @@ import java.util.Set;
  */
 class LocalScoreManager extends ScoreManager {
 
-    // ============
-    //
-    // Constants
-    //
-    // ============
-
-    private static final String MostSpinsKey = "most spins key";
-    private static final String GamesPlayedKey = "games played key";
-    private static final String GamesWonKey = "games won key";
-
-    // TODO figure out what file path we can write to
-    private static final String DataFilePath = "";
-
-    // ============
-    //
-    // i-vars
-    //
-    // ============
-
-    private Map<String,Map<String,Object>> data;
-
-    {
-        data = retrieveData ();
-        if (data == null) {
-            data = new HashMap<String,Map<String,Object>> ();
-        }
-    }
-
-    // ============
-    //
-    // Override
-    //
-    // ============
-
     @Override
     public void reportSpins (String user, int spins) {
         if (updateSpins (user, spins)) {
-            storeData (data);
+            storeData (getData ());
         }
     }
 
     @Override
     public void reportGame (String user, int spins, boolean won) {
         if (updateSpins (user, spins) || updateGames (user, won)) {
-            storeData(data);
+            storeData(getData ());
         }
     }
 
     @Override
     public Set<String> getAllUsers () {
-        return data.keySet ();
+        return getData().keySet();
     }
 
     @Override
-    public int getMostSpins (String user) {
-        return (Integer)data.get(user).get (MostSpinsKey);
-    }
+    public int getMostSpins (String user) { return (Integer)getData().get(user).get (MOST_SPINS_KEY); }
 
     @Override
-    public int getGamesPlayed (String user) {
-        return (Integer)data.get(user).get (GamesPlayedKey);
-    }
+    public int getGamesPlayed (String user) { return (Integer)getData().get(user).get (GAMES_PLAYED_KEY); }
 
     @Override
     public int getGamesWon (String user) {
-        return (Integer)data.get(user).get (GamesWonKey);
+        return (Integer)getData().get(user).get (GAMES_WON_KEY);
     }
 
     // ============
@@ -88,6 +53,14 @@ class LocalScoreManager extends ScoreManager {
     //
     // ============
 
+    private static final String MOST_SPINS_KEY = "most spins key";
+    private static final String GAMES_PLAYED_KEY = "games played key";
+    private static final String GAMES_WON_KEY = "games won key";
+    private static final String DATA_FILE_NAME = "scoreboard_data";
+
+    // lazily instantiated, access using getter method
+    private Map<String,Map<String,Object>> mData;
+
     /**
      *
      * @param user
@@ -95,18 +68,20 @@ class LocalScoreManager extends ScoreManager {
      * @return true if data was modified as a result of the call, false otherwise
      */
     private boolean updateGames (String user, boolean won) {
-        Map<String,Object> userInfo = data.get (user);
+        boolean newUser = addUser (user);
+        Map<String,Object> userInfo = getData().get (user);
 
-        int gamesPlayed = (Integer)userInfo.get (GamesPlayedKey);
-        int gamesWon = (Integer)userInfo.get (GamesWonKey);
+        int gamesPlayed = (Integer)userInfo.get (GAMES_PLAYED_KEY);
+        int gamesWon = (Integer)userInfo.get (GAMES_WON_KEY);
 
         gamesPlayed += 1;
         gamesWon += won ? 1 : 0;
 
-        userInfo.put (GamesPlayedKey, gamesPlayed);
-        userInfo.put (GamesWonKey, gamesWon);
+        userInfo.put (GAMES_PLAYED_KEY, gamesPlayed);
+        userInfo.put (GAMES_WON_KEY, gamesWon);
 
-        return true;
+        // data is always changed
+        return newUser || true;
     }
 
     /**
@@ -116,23 +91,49 @@ class LocalScoreManager extends ScoreManager {
      * @return true if data was modified as a result of the call, false otherwise
      */
     private boolean updateSpins (String user, int spins) {
-        Map<String,Object> userInfo = data.get (user);
-        int mostSpins = (Integer)userInfo.get (MostSpinsKey);
+        boolean newUser = addUser (user);
+
+        Map<String,Object> userInfo = getData().get(user);
+        int mostSpins = (Integer)userInfo.get (MOST_SPINS_KEY);
         if (spins > mostSpins) {
-            userInfo.put (MostSpinsKey, spins);
+            userInfo.put (MOST_SPINS_KEY, spins);
             return true;
         }
-        return false;
+
+        return newUser;
+    }
+
+    /**
+     *
+     * @param user the user to be added
+     * @return true if user was added, false otherwise (ex. user was added at an earlier date)
+     */
+    private boolean addUser (String user) {
+        Map<String,Object> userInfo = getData().get(user);
+
+        if (userInfo != null) {
+            return false;
+        }
+
+        userInfo = new HashMap<String,Object> ();
+        userInfo.put (MOST_SPINS_KEY, 0);
+        userInfo.put (GAMES_PLAYED_KEY, 0);
+        userInfo.put (GAMES_WON_KEY, 0);
+
+        getData().put (user, userInfo);
+
+        return true;
     }
 
     /**
      *
      * @param data the map to be stored in the file at DataFilePath
      */
-    private static void storeData (Map data) {
+    private void storeData (Map data) {
 
         try {
-            FileOutputStream fileOut = new FileOutputStream(DataFilePath);
+            File file = new File (getContext().getFilesDir(), DATA_FILE_NAME);
+            FileOutputStream fileOut = new FileOutputStream(file);
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
             out.writeObject(data);
             out.close();
@@ -140,6 +141,7 @@ class LocalScoreManager extends ScoreManager {
 
         // TODO error handling
         } catch(IOException i) {
+            throw new AssertionError ();
         }
 
     }
@@ -148,12 +150,13 @@ class LocalScoreManager extends ScoreManager {
      *
      * @return the map created from the file at DataFilePath
      */
-    private static Map retrieveData () {
+    private Map retrieveData () {
 
         Map result = null;
 
         try {
-            FileInputStream fileIn = new FileInputStream(DataFilePath);
+            File file = new File (getContext().getFilesDir(), DATA_FILE_NAME);
+            FileInputStream fileIn = new FileInputStream(file);
             ObjectInputStream in = new ObjectInputStream(fileIn);
             Object obj = in.readObject ();
             result = (Map) obj;
@@ -163,8 +166,26 @@ class LocalScoreManager extends ScoreManager {
         // TODO error handling
         } catch(IOException i) {
         } catch(ClassNotFoundException c) {
+            throw new AssertionError ();
         }
 
         return result;
+    }
+
+    /**
+     *
+     * @return data, using lazy instantiation
+     */
+    private Map<String,Map<String,Object>> getData () {
+        if (mData != null) {
+            return mData;
+        }
+
+        mData = retrieveData ();
+        if (mData == null) {
+            mData = new HashMap<String,Map<String,Object>> ();
+        }
+
+        return mData;
     }
 }
