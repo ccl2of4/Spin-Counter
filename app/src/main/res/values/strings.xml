@@ -4,5 +4,13 @@
     <string name="app_name">Spin-Counter</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_score_board">ScoreBoardActivity</string>
+
+    <!-- score board -->
+    <string name="score_board_name">Name</string>
+    <string name="score_board_most_spins">Spins</string>
+    <string name="score_board_games_played">Played</string>
+    <string name="score_board_games_won">Won</string>
+    <string name="score_board_games_lost">Lost</string>
 
 </resources>
