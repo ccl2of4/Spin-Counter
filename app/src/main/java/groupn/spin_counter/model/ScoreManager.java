@@ -28,7 +28,7 @@ public abstract class ScoreManager {
      * @return the appropriate singleton for the required type
      */
     public final static ScoreManager getInstance (Type type) {
-        ScoreManager scoreManager = instances.get (type);
+        ScoreManager scoreManager = sInstances.get (type);
         return scoreManager;
     }
 
@@ -100,8 +100,8 @@ public abstract class ScoreManager {
      *
      * @return the context used by the ScoreManager. This probably needs to be set before calling any methods
      */
-    public final Context getContext () { return context; }
-    public final void setContext (Context context) { this.context = context; }
+    public final Context getContext () { return mContext; }
+    public final void setContext (Context context) { this.mContext = context; }
 
     // ============
     //
@@ -109,11 +109,11 @@ public abstract class ScoreManager {
     //
     // ============
 
-    private final static Map<Type,ScoreManager> instances = new HashMap<Type,ScoreManager> ();
-    private Context context;
+    private final static Map<Type,ScoreManager> sInstances = new HashMap<Type,ScoreManager> ();
+    private Context mContext;
 
     static {
-        instances.put (Type.Local, new LocalScoreManager());
+        sInstances.put (Type.Local, new LocalScoreManager());
     }
 
 }
