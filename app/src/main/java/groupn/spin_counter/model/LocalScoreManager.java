@@ -26,7 +26,8 @@ class LocalScoreManager extends ScoreManager {
 
     @Override
     public void reportGame (String user, int spins, boolean won) {
-        if (updateSpins (user, spins) || updateGames (user, won)) {
+        //use the bitwise or to avoid short-circuit evaluation
+        if (updateSpins (user, spins) | updateGames (user, won)) {
             storeData(getData ());
         }
     }
@@ -37,14 +38,42 @@ class LocalScoreManager extends ScoreManager {
     }
 
     @Override
-    public int getMostSpins (String user) { return (Integer)getData().get(user).get (MOST_SPINS_KEY); }
+    public int getMostSpins (String user) {
+        return (Integer)getData().get(user).get (MOST_SPINS_KEY);
+    }
 
     @Override
-    public int getGamesPlayed (String user) { return (Integer)getData().get(user).get (GAMES_PLAYED_KEY); }
+    public int getGamesPlayed (String user) {
+        return (Integer)getData().get(user).get (GAMES_PLAYED_KEY);
+    }
 
     @Override
     public int getGamesWon (String user) {
         return (Integer)getData().get(user).get (GAMES_WON_KEY);
+    }
+
+    /**
+     * clear all score data
+     */
+    void clearData () {
+        Map data = getData ();
+        data.clear ();
+        storeData (data);
+    }
+
+    /**
+     *
+     * @return the file name for persistent storage
+     */
+    String getDataFileName () {
+        if (mDataFileName == null) {
+            mDataFileName = DEFAULT_DATA_FILE_NAME;
+        }
+        return mDataFileName;
+    }
+
+    void setDataFileName (String dataFileName) {
+        mDataFileName = dataFileName;
     }
 
     // ============
@@ -56,10 +85,11 @@ class LocalScoreManager extends ScoreManager {
     private static final String MOST_SPINS_KEY = "most spins key";
     private static final String GAMES_PLAYED_KEY = "games played key";
     private static final String GAMES_WON_KEY = "games won key";
-    private static final String DATA_FILE_NAME = "scoreboard_data";
+    private static final String DEFAULT_DATA_FILE_NAME = "scoreboard_data";
 
-    // lazily instantiated, access using getter method
+    // self-encapsulated fields
     private Map<String,Map<String,Object>> mData;
+    private String mDataFileName;
 
     /**
      *
@@ -132,7 +162,7 @@ class LocalScoreManager extends ScoreManager {
     private void storeData (Map data) {
 
         try {
-            File file = new File (getContext().getFilesDir(), DATA_FILE_NAME);
+            File file = new File (getContext().getFilesDir(), getDataFileName());
             FileOutputStream fileOut = new FileOutputStream(file);
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
             out.writeObject(data);
@@ -155,7 +185,7 @@ class LocalScoreManager extends ScoreManager {
         Map result = null;
 
         try {
-            File file = new File (getContext().getFilesDir(), DATA_FILE_NAME);
+            File file = new File (getContext().getFilesDir(), getDataFileName());
             FileInputStream fileIn = new FileInputStream(file);
             ObjectInputStream in = new ObjectInputStream(fileIn);
             Object obj = in.readObject ();
