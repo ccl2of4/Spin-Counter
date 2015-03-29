@@ -1,7 +1,6 @@
 package groupn.spin_counter.model;
 
 import android.test.AndroidTestCase;
-import android.util.Log;
 
 /**
  * Created by connor on 3/28/15.
@@ -23,76 +22,75 @@ public class LocalScoreManagerTest extends AndroidTestCase {
         assertEquals (0, mLocalScoreManager.getAllUsers().size ());
     }
 
-    //
-    // -reportGame
-    //
-    public void testReportGame1 () {
+    public void testReportGameAddUser () {
+        mLocalScoreManager.reportGame ("Connor", 1, true);
+
+        assertEquals(1, mLocalScoreManager.getAllUsers().size());
+    }
+
+    public void testReportTwoGamesAddUser () {
         mLocalScoreManager.reportGame ("Connor", 1, true);
         mLocalScoreManager.reportGame ("Connor", 2, false);
 
         assertEquals(1, mLocalScoreManager.getAllUsers().size());
     }
 
-    public void testReportGame2 () {
+    public void testReportGameAddTwoUsers () {
         mLocalScoreManager.reportGame ("Connor", 1, true);
         mLocalScoreManager.reportGame ("Jack", 15, false);
 
         assertEquals(2, mLocalScoreManager.getAllUsers().size());
     }
 
-    public void testReportGame3 () {
+    public void testReportGameGetGamesPlayed () {
         mLocalScoreManager.reportGame("Connor", 4, true);
 
         assertEquals(1, mLocalScoreManager.getGamesPlayed("Connor"));
     }
 
-    public void testReportGame4 () {
+    public void testReportTwoGamesGetGamesPlayed () {
         mLocalScoreManager.reportGame ("Connor", 4, true);
         mLocalScoreManager.reportGame ("Connor", 4, true);
 
         assertEquals (2, mLocalScoreManager.getGamesPlayed ("Connor"));
     }
 
-    public void testReportGame5 () {
+    public void testReportTwoGamesGetGamesWon () {
         mLocalScoreManager.reportGame ("Connor", 4, true);
         mLocalScoreManager.reportGame ("Connor", 4, true);
 
         assertEquals (2, mLocalScoreManager.getGamesWon ("Connor"));
     }
 
-    public void testReportGame6 () {
+    public void testReportTwoGamesGetMostSpins () {
         mLocalScoreManager.reportGame ("Connor", 7, true);
         mLocalScoreManager.reportGame ("Connor", 4, true);
 
         assertEquals (7, mLocalScoreManager.getMostSpins("Connor"));
     }
 
-    public void testReportGame7 () {
+    public void testReportTwoGamesGetMostSpins2 () {
         mLocalScoreManager.reportGame ("Connor", 5, true);
         mLocalScoreManager.reportGame ("Connor", 12, true);
 
         assertEquals (12, mLocalScoreManager.getMostSpins ("Connor"));
     }
 
-    //
-    // -reportSpins
-    //
-
-    public void testReportSpins1 () {
+    public void testReportTwoSpinsAddUser () {
         mLocalScoreManager.reportSpins ("Connor", 14);
         mLocalScoreManager.reportSpins ("Connor", 12);
 
         assertEquals (1, mLocalScoreManager.getAllUsers().size ());
     }
 
-    public void testReportSpins2 () {
+    public void testReportSpinsAddTwoUsers () {
         mLocalScoreManager.reportSpins ("Connor", 14);
         mLocalScoreManager.reportSpins ("Sarah", 12);
 
         assertEquals (2, mLocalScoreManager.getAllUsers().size ());
     }
 
-    public void testReportSpins3 () {
+    public void testReportSpinsAddTwoUser2 () {
         mLocalScoreManager.reportSpins ("Connor", 14);
         mLocalScoreManager.reportSpins ("Sarah", 12);
         mLocalScoreManager.reportSpins ("Connor", 12);
@@ -100,27 +98,27 @@ public class LocalScoreManagerTest extends AndroidTestCase {
         assertEquals (2, mLocalScoreManager.getAllUsers().size ());
     }
 
-    public void testReportSpins4 () {
+    public void testReportSpinsGetMostSpins () {
         mLocalScoreManager.reportSpins("Connor", 1);
 
         assertEquals (1, mLocalScoreManager.getMostSpins ("Connor"));
     }
 
-    public void testReportSpins5 () {
+    public void testReportTwoSpinsGetMostSpins () {
         mLocalScoreManager.reportSpins ("Connor", 12);
         mLocalScoreManager.reportSpins ("Connor", 14);
 
         assertEquals (14, mLocalScoreManager.getMostSpins ("Connor"));
     }
 
-    public void testReportSpins6 () {
+    public void testReportTwoSpinsGetMostSpins2 () {
         mLocalScoreManager.reportSpins ("Connor", 14);
         mLocalScoreManager.reportSpins ("Connor", 12);
 
         assertEquals (14, mLocalScoreManager.getMostSpins ("Connor"));
     }
 
-    public void testReportSpins7 () {
+    public void testReportTwoSpinsGetGamesPlayed () {
         mLocalScoreManager.reportSpins ("Connor", 14);
         mLocalScoreManager.reportSpins ("Connor", 12);
 
