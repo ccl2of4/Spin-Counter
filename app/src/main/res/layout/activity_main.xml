@@ -28,4 +28,25 @@
         android:elegantTextHeight="false"
         android:background="@android:color/holo_blue_bright" />
 
+    <Button
+        android:id="@+id/start_spin"
+        android:text="@string/start_spin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:background="@android:color/holo_blue_bright"
+        android:elegantTextHeight="false" />
+
+    <TextView
+        android:id="@+id/spin_count"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:textSize="64sp"
+        android:background="@android:color/holo_blue_bright"
+        android:elegantTextHeight="false" />
+
 </RelativeLayout>

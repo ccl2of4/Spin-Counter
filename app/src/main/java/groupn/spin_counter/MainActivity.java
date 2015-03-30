@@ -5,19 +5,20 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.TextView;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements SpinCounter.SpinListener {
     // constant for identifying the dialog
     private static final int DIALOG_ALERT = 10;
     //user name
@@ -26,6 +27,14 @@ public class MainActivity extends ActionBarActivity {
     private SharedPreferences mPrefs;
     //tracks if this is the first time the user has run the app
     private boolean mIsFirstTime;
+
+    private Button mSpinButton;
+    private TextView mSpinCountTextView;
+    private int mCurrentNumberOfSpins;
+    private float mOffset;
+    private boolean mOnce;
+
+    private SpinCounter mSpinCounter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +57,18 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        mSpinCounter = new SpinCounter(this);
+        mSpinButton = (Button)findViewById(R.id.start_spin);
+        mSpinButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startSpinSession();
+            }
+        });
+
+        mSpinCountTextView = (TextView)findViewById(R.id.spin_count);
+        mCurrentNumberOfSpins = 0;
+
         mPrefs = getSharedPreferences("sc_prefs", MODE_PRIVATE);
         mIsFirstTime = mPrefs.getBoolean("mIsFirstTime", true);
         mUsername = mPrefs.getString("mUsername", "New User");
@@ -57,6 +78,12 @@ public class MainActivity extends ActionBarActivity {
         }
         else
             Log.d("Username = ", mUsername);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mSpinCounter.stop();
     }
 
     @Override
@@ -109,6 +136,62 @@ public class MainActivity extends ActionBarActivity {
                 dialog.show();
         }
         return super.onCreateDialog(id);
+    }
+
+    private void startSpinSession() {
+        mSpinButton.setVisibility(View.GONE);
+        mSpinCountTextView.setVisibility((View.VISIBLE));
+        mSpinCounter.prep();
+        mOnce = true;
+        mSpinCountTextView.setText("3");
+        new CountDownTimer(3100, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                if (millisUntilFinished <= 2000) {
+                    if (mOnce) {
+                        mOffset = mSpinCounter.getLastDeg();
+                        mOnce = false;
+                    }
+                }
+                mSpinCountTextView.setText(Long.toString(millisUntilFinished / 1000));
+            }
+
+            @Override
+            public void onFinish() {
+                mSpinCountTextView.setText(R.string.go);
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSpinCounter.start();
+                    }
+                }, 250);
+            }
+        }.start();
+    }
+
+    @Override
+    public void onSensorUpdate(float azimuth) {
+        float adjAzimuth = azimuth + mOffset;
+        if (adjAzimuth >= 360.0f) {
+            adjAzimuth -= 360.0f;
+        }
+        if (adjAzimuth < 180.0f) {
+            mSpinCountTextView.setRotation(adjAzimuth + 180.0f);
+        } else {
+            mSpinCountTextView.setRotation(adjAzimuth - 180.0f);
+        }
+    }
+
+    @Override
+    public void onFullRotation() {
+        mCurrentNumberOfSpins++;
+        mSpinCountTextView.setText(Integer.toString(mCurrentNumberOfSpins));
+    }
+
+    @Override
+    public void done() {
+        mSpinCounter.stop();
     }
 
     private final class CancelOnClickListener implements

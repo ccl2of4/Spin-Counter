@@ -6,6 +6,8 @@
 
     <!-- main activity -->
     <string name="main_scoreboard">Leaderboards</string>
+    <string name="start_spin">Spin</string>
+    <string name="go">Go!</string>
 
     <!-- score board -->
     <string name="title_activity_score_board">ScoreBoardActivity</string>
