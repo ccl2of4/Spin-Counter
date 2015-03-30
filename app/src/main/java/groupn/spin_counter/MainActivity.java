@@ -101,10 +101,16 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        /*if (id == R.id.action_settings) {
             return true;
         }
-        return super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);*/
+        switch (id) {
+            case R.id.change_username:
+                showDialog(DIALOG_ALERT);
+                return true;
+        }
+        return false;
     }
 
     @Override
