@@ -31,8 +31,6 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private Button mSpinButton;
     private TextView mSpinCountTextView;
     private int mCurrentNumberOfSpins;
-    private float mOffset;
-    private boolean mOnce;
 
     private SpinCounter mSpinCounter;
 
@@ -58,6 +56,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         });
 
         mSpinCounter = new SpinCounter(this);
+        mSpinCounter.registerListener(this);
         mSpinButton = (Button)findViewById(R.id.start_spin);
         mSpinButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,18 +140,12 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private void startSpinSession() {
         mSpinButton.setVisibility(View.GONE);
         mSpinCountTextView.setVisibility((View.VISIBLE));
+        mSpinCountTextView.setRotation(0.0f);
         mSpinCounter.prep();
-        mOnce = true;
         mSpinCountTextView.setText("3");
         new CountDownTimer(3100, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                if (millisUntilFinished <= 2000) {
-                    if (mOnce) {
-                        mOffset = mSpinCounter.getLastDeg();
-                        mOnce = false;
-                    }
-                }
                 mSpinCountTextView.setText(Long.toString(millisUntilFinished / 1000));
             }
 
@@ -171,27 +164,17 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     }
 
     @Override
-    public void onSensorUpdate(float azimuth) {
-        float adjAzimuth = azimuth + mOffset;
-        if (adjAzimuth >= 360.0f) {
-            adjAzimuth -= 360.0f;
-        }
-        if (adjAzimuth < 180.0f) {
-            mSpinCountTextView.setRotation(adjAzimuth + 180.0f);
-        } else {
-            mSpinCountTextView.setRotation(adjAzimuth - 180.0f);
-        }
-    }
-
-    @Override
-    public void onFullRotation() {
-        mCurrentNumberOfSpins++;
+    public void onUpdate(float totalDegrees) {
+        mCurrentNumberOfSpins = Math.abs((int)(totalDegrees/360.0f));
         mSpinCountTextView.setText(Integer.toString(mCurrentNumberOfSpins));
+        mSpinCountTextView.setRotation(-Math.abs(totalDegrees));
     }
 
     @Override
     public void done() {
         mSpinCounter.stop();
+        mSpinButton.setVisibility(View.VISIBLE);
+        mSpinCountTextView.setVisibility((View.GONE));
     }
 
     private final class CancelOnClickListener implements

@@ -5,7 +5,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,23 +14,23 @@ import java.util.List;
  */
 public class SpinCounter implements SensorEventListener {
 
-    private static final int UNDEFINED = -1;
-    private static final int CLOCKWISE = 0;
-    private static final int COUNTERCLOCKWISE = 1;
     private List<SpinListener> listeners;
     SensorManager sensorManager;
-    private float[] rotationM = new float[16];
-    private float[] orientationV = new float[3];
-    private boolean spinning;
-    private float initialDeg;
     private float lastDeg;
-    private int direction;
     private boolean ready;
+    private float[] gravity = new float[3];
+    private boolean gravityInit;
+    private float[] geomagnetic = new float[3];
+    private boolean geomagneticInit;
+    private float totalDegrees;
+
 
     public SpinCounter(Context context) {
         listeners = new ArrayList<SpinListener>();
         sensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
         ready = false;
+        gravityInit = false;
+        geomagneticInit = false;
     }
 
     public void registerListener(SpinListener listener) {
@@ -43,119 +42,101 @@ public class SpinCounter implements SensorEventListener {
     }
 
     public void prep() {
-        sensorManager.registerListener(this,
+        if(!sensorManager.registerListener(this,
                 sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),
-                sensorManager.SENSOR_DELAY_FASTEST);
+                sensorManager.SENSOR_DELAY_UI)) {
+            sensorManager.registerListener(this,
+                    sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                    sensorManager.SENSOR_DELAY_UI);
+            sensorManager.registerListener(this,
+                    sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD),
+                    sensorManager.SENSOR_DELAY_UI);
+        }
     }
-
-    public float getLastDeg() {
-        return lastDeg;
-    }
-
     public void start() {
-        direction = UNDEFINED;
-        spinning = false;
         ready = true;
+        totalDegrees = 0.0f;
 
     }
     public void stop() {
         sensorManager.unregisterListener(this);
         ready = false;
+        geomagneticInit = false;
+        gravityInit = false;
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         synchronized (this) {
+            float[] orientationV = new float[3];
             if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
+                float[] rotationM = new float[16];
                 SensorManager.getRotationMatrixFromVector(rotationM, event.values);
                 SensorManager.getOrientation(rotationM, orientationV);
-                float azimuthInDegrees = (float) Math.toDegrees(orientationV[0]);
-                float pitchInDegrees = (float) Math.toDegrees(orientationV[1]);
-                float rollInDegrees = (float) Math.toDegrees(orientationV[2]);
-                if (azimuthInDegrees < 0.0f) {
-                    azimuthInDegrees += 360.0f;
+            } else if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                for(int i=0; i<3; i++){
+                    gravity[i] =  event.values[i];
                 }
-                if (pitchInDegrees < 0.0f) {
-                    pitchInDegrees += 360.0f;
+                gravityInit = true;
+                if (geomagneticInit) {
+                    float rotationM[] = new float[9];
+                    float rotationI[] = new float[9];
+                    SensorManager.getRotationMatrix(rotationM, rotationI, gravity, geomagnetic);
+                    SensorManager.getOrientation(rotationM, orientationV);
+                } else {
+                    return;
                 }
-                if (rollInDegrees < 0.0f) {
-                    rollInDegrees += 360.0f;
+            } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+                for(int i=0; i<3; i++){
+                    geomagnetic[i] =  event.values[i];
                 }
-                if (ready) {
-                    for (SpinListener listener : listeners) {
-                        listener.onSensorUpdate(azimuthInDegrees);
-                    }
-
-                    if (!spinning) {
-                        // Set the starting position
-                        initialDeg = azimuthInDegrees;
-                        spinning = true;
-                    } else if (direction == UNDEFINED) {
-                        //  Detect which direction the phone is spinning
-                        if (Math.abs(initialDeg - azimuthInDegrees) < 180.0f) {
-                            if (azimuthInDegrees > initialDeg) {
-                                direction = CLOCKWISE;
-                            } else {
-                                direction = COUNTERCLOCKWISE;
-                            }
-                        } else {
-                            if (azimuthInDegrees > initialDeg) {
-                                direction = COUNTERCLOCKWISE;
-                            } else {
-                                direction = CLOCKWISE;
-                            }
-                        }
-                    } else {
-                        // Determine if the phone has made a rotation or has stopped spinning fast enough
-                        float adjAzimuth = azimuthInDegrees - initialDeg;
-                        float adjLastDeg = lastDeg - initialDeg;
-                        if (adjAzimuth < 0.0f) {
-                            adjAzimuth += 360.0f;
-                        }
-                        if (adjLastDeg < 0.0f) {
-                            adjLastDeg += 360.0f;
-                        }
-
-                        if (direction == CLOCKWISE) {
-                            if (adjLastDeg > adjAzimuth) {
-                                if ((360.0f - adjLastDeg) + adjAzimuth < 180.0f) {
-                                    for (SpinListener listener : listeners) {
-                                        listener.onFullRotation();
-                                    }
-                                } else {
-                                    for (SpinListener listener : listeners) {
-                                        listener.done();
-                                        return;
-                                    }
-                                }
-                            }
-                        } else {
-                            if (adjLastDeg < adjAzimuth) {
-                                if ((360.0f - adjAzimuth) + adjLastDeg < 180.f) {
-                                    for (SpinListener listener : listeners) {
-                                        listener.onFullRotation();
-                                    }
-                                } else {
-                                    for (SpinListener listener : listeners) {
-                                        listener.done();
-                                        return;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if ((pitchInDegrees > 80.0f && pitchInDegrees < 170.0f) ||
-                            (rollInDegrees > 80.0f && rollInDegrees < 170.0f)) {
-                        for (SpinListener listener : listeners) {
-                            listener.done();
-                            return;
-                        }
-                    }
-                    //Log.i("SpinCounter", String.format("Orientation: %f", azimuthInDegrees));
+                geomagneticInit = true;
+                if (gravityInit) {
+                    float rotationM[] = new float[9];
+                    float rotationI[] = new float[9];
+                    SensorManager.getRotationMatrix(rotationM, rotationI, gravity, geomagnetic);
+                    SensorManager.getOrientation(rotationM, orientationV);
+                } else {
+                    return;
                 }
-                lastDeg = azimuthInDegrees;
+            } else {
+                return;
             }
+
+            float azimuthInDegrees = (float) Math.toDegrees(orientationV[0]);
+            float pitchInDegrees = (float) Math.toDegrees(orientationV[1]);
+            float rollInDegrees = (float) Math.toDegrees(orientationV[2]);
+            if (azimuthInDegrees < 0.0f) {
+                azimuthInDegrees += 360.0f;
+            }
+            if (pitchInDegrees < 0.0f) {
+                pitchInDegrees += 360.0f;
+            }
+            if (rollInDegrees < 0.0f) {
+                rollInDegrees += 360.0f;
+            }
+            if (ready) {
+                float delta = azimuthInDegrees - lastDeg;
+                if (Math.abs(delta) > 180.0f) {
+                    if (delta < 0.0f) {
+                        delta += 360.0f;
+                    } else {
+                        delta -= 360.0f;
+                    }
+                }
+                totalDegrees += delta;
+                for (SpinListener listener : listeners) {
+                    listener.onUpdate(totalDegrees);
+                }
+                if ((pitchInDegrees > 60.0f && pitchInDegrees < 300.0f) ||
+                        (rollInDegrees > 60.0f && rollInDegrees < 300.0f)) {
+                    for (SpinListener listener : listeners) {
+                        listener.done();
+                        return;
+                    }
+                }
+            }
+            lastDeg = azimuthInDegrees;
         }
     }
 
@@ -165,8 +146,7 @@ public class SpinCounter implements SensorEventListener {
     }
 
     public interface SpinListener {
-        public void onSensorUpdate(float azimuth);
-        public void onFullRotation();
+        public void onUpdate(float totalDegrees);
         public void done();
     }
 }
