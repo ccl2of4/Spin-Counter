@@ -180,7 +180,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     public void onUpdate(float totalDegrees) {
         mCurrentNumberOfSpins = Math.abs((int)(totalDegrees/360.0f));
         mSpinCountTextView.setText(Integer.toString(mCurrentNumberOfSpins));
-        mSpinCountTextView.setRotation(-Math.abs(totalDegrees));
+        mSpinCountTextView.setRotation(-totalDegrees);
     }
 
     @Override
