@@ -37,4 +37,10 @@ public class NFCBrawlActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.push_left_in,R.anim.push_left_out);
+    }
 }
