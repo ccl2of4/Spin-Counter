@@ -82,6 +82,8 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         }
         else
             Log.d("Username = ", mUsername);
+
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
     }
 
     @Override
