@@ -122,6 +122,8 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
                 builder.setCancelable(true);
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
+                Log.d("USERNAME HINT", mUsername);
+                input.setHint(mUsername);
                 builder.setView(input);
                 builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
