@@ -140,6 +140,8 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
                         ed.putBoolean("mIsFirstTime",false);
                         mIsFirstTime = false;
                         String value = input.getText().toString();
+                        if(value.length() == 0)
+                            value = mPrefs.getString("mUsername", "New User");
                         mUsername = value;
                         ed.putString("mUsername", value);
                         Log.d("VALUE", value);
