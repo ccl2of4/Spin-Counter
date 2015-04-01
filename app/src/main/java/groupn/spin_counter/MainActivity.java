@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
@@ -123,13 +124,15 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     protected Dialog onCreateDialog(int id) {
         switch (id) {
             case DIALOG_ALERT:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage("Please enter a username");
-                builder.setCancelable(true);
+                AlertDialog.Builder builder = new AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_DARK).
+                setMessage("Please enter a username").
+                setCancelable(true);
                 // Set an EditText view to get user input
                 final EditText input = new EditText(this);
+                input.setTextColor(Color.parseColor("#ffffffff"));
                 Log.d("USERNAME HINT", mUsername);
                 input.setHint(mUsername);
+                input.setHintTextColor(Color.GRAY);
                 builder.setView(input);
                 builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
