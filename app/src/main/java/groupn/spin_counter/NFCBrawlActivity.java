@@ -1,11 +1,18 @@
 package groupn.spin_counter;
 
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.List;
+
 import groupn.spin_counter.R;
+import groupn.spin_counter.bluetooth.BluetoothFragment;
 
 public class NFCBrawlActivity extends ActionBarActivity {
 
@@ -13,6 +20,27 @@ public class NFCBrawlActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nfcbrawl);
+        SensorManager mgr = (SensorManager) getSystemService(SENSOR_SERVICE);
+        List<Sensor> sensors = mgr.getSensorList(Sensor.TYPE_ALL);
+        for (Sensor sensor : sensors) {
+            Log.d("Sensors", "" + sensor.getName());
+        }
+        if(mgr.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null)
+        {
+
+            Log.d("Sensors", "" + "FOUND IT");
+        }
+        else
+        {
+            Log.d("Sensors", "" + "CRAP");
+        }
+
+        if (savedInstanceState == null) {
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            BluetoothFragment fragment = new BluetoothFragment();
+            transaction.replace(R.id.sample_content_fragment, fragment);
+            transaction.commit();
+        }
     }
 
 

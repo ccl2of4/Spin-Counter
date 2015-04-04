@@ -2,6 +2,7 @@ package groupn.spin_counter;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,7 +20,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 public class MainActivity extends ActionBarActivity implements SpinCounter.SpinListener {
@@ -27,6 +27,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private static final int DIALOG_ALERT = 10;
     //user name
     private String mUsername;
+    private static String mUser;
     //stored data file
     private SharedPreferences mPrefs;
     //tracks if this is the first time the user has run the app
@@ -77,6 +78,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mPrefs = getSharedPreferences("sc_prefs", MODE_PRIVATE);
         mIsFirstTime = mPrefs.getBoolean("mIsFirstTime", true);
         mUsername = mPrefs.getString("mUsername", "New User");
+        mUser = mUsername;
         if(mIsFirstTime) {
             Log.d(mUsername, "First time running the app");
             showDialog(DIALOG_ALERT);
@@ -143,6 +145,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
                         if(value.length() == 0)
                             value = mPrefs.getString("mUsername", "New User");
                         mUsername = value;
+                        mUser = mUsername;
                         ed.putString("mUsername", value);
                         Log.d("VALUE", value);
                         ed.apply();
@@ -201,5 +204,9 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             DialogInterface.OnClickListener {
         public void onClick(DialogInterface dialog, int which) {
         }
+    }
+
+    public static String getUName(){
+        return mUser;
     }
 }
