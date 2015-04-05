@@ -21,6 +21,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import groupn.spin_counter.model.ScoreManager;
+
 
 public class MainActivity extends ActionBarActivity implements SpinCounter.SpinListener {
     // constant for identifying the dialog
@@ -38,6 +40,9 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private int mCurrentNumberOfSpins;
 
     private SpinCounter mSpinCounter;
+    private ScoreManager mScoreManager;
+
+    private final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +66,9 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
                 overridePendingTransition(R.anim.push_right_in,R.anim.push_right_out);
             }
         });
+
+        mScoreManager = ScoreManager.getInstance(ScoreManager.Type.Local);
+        mScoreManager.setContext(getApplicationContext());
 
         mSpinCounter = new SpinCounter(this);
         mSpinCounter.registerListener(this);
@@ -198,6 +206,9 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mSpinCounter.stop();
         mSpinButton.setVisibility(View.VISIBLE);
         mSpinCountTextView.setVisibility((View.GONE));
+
+        Log.d (TAG, "adding spins");
+        mScoreManager.reportSpins(mUsername,mCurrentNumberOfSpins);
     }
 
     private final class CancelOnClickListener implements
