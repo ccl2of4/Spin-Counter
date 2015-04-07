@@ -8,13 +8,10 @@ Start a spin session:
   -Wait for the countdown to finish
   -Spin your phone and it will count rotations.
   -The spinning session is over when the device flips sideways
-
 Change your usename:
   -Select the icon in the top right corner
-
 View the leaderboards (currently local only):
   -Select the "Leaderboards" button in the bottom right corner.
-
 Challange an opponent to a 1v1 match (functionality incomplete):
   -Select the "NFC Match" button on the bottom right
 
