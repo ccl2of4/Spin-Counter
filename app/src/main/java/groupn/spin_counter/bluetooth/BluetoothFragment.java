@@ -188,7 +188,7 @@ public class BluetoothFragment extends Fragment {
                 }
 
                 //Start of Spin Protocol//
-                sendMessage(""getUName());
+                sendMessage(""+getUName());
             }
         });
 

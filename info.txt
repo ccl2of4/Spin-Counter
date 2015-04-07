@@ -1,0 +1,25 @@
+Mike Kojder mwk435
+Seth
+Connor
+
+How to use: 
+To start a "spin session" you simply press the middle spin button and it will count down and when it says go you can spin your phone and it will count rotations.  When the phone moves too far from the screen-up position, the session is over.  The change your username, select the icon in the top left corner. To see the local leaderboard, select the corresponding button in the bottom right corner.
+
+Features completed:
+Spin counting - counts the number of spins your phone has made (works best on phones with gyroscopes, see http://stackoverflow.com/questions/4347143/which-android-phones-out-there-do-have-a-gyroscope)
+Scoreboard - Displays highest scores for this phone
+Basic settings - Username for high scores
+
+Features not yet completed:
+NFC (Probably will be changed to bluetooth)
+Friend/Global scoreboard - Display highest score among "friends list" and other users
+Friends list - list of friends to be used in friends scoreboard
+Still image - Image that spins with the phone.
+Sound effects - Sound effects
+
+Classes written ourselves:
+SpinCounter
+ScoreBoardActivity
+MainActivity
+ScoreManager
+LocalScoreManager
