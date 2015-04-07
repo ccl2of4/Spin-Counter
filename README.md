@@ -1,2 +1,0 @@
-# Spin-Counter
-Android app
