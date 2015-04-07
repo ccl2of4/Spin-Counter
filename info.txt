@@ -1,25 +1,61 @@
 Mike Kojder mwk435
-Seth
-Connor
+Seth Halley
+Connor Lirot ccl676
 
-How to use: 
-To start a "spin session" you simply press the middle spin button and it will count down and when it says go you can spin your phone and it will count rotations.  When the phone moves too far from the screen-up position, the session is over.  The change your username, select the icon in the top left corner. To see the local leaderboard, select the corresponding button in the bottom right corner.
+[USAGE]
+Start a spin session:
+  -Press the middle spin button
+  -Wait for the countdown to finish
+  -Spin your phone and it will count rotations.
+  -The spinning session is over when the device flips sideways
 
-Features completed:
-Spin counting - counts the number of spins your phone has made (works best on phones with gyroscopes, see http://stackoverflow.com/questions/4347143/which-android-phones-out-there-do-have-a-gyroscope)
-Scoreboard - Displays highest scores for this phone
-Basic settings - Username for high scores
+Change your usename:
+  -Select the icon in the top right corner
 
-Features not yet completed:
-NFC (Probably will be changed to bluetooth)
-Friend/Global scoreboard - Display highest score among "friends list" and other users
-Friends list - list of friends to be used in friends scoreboard
-Still image - Image that spins with the phone.
-Sound effects - Sound effects
+View the leaderboards (currently local only):
+  -Select the "Leaderboards" button in the bottom right corner.
 
-Classes written ourselves:
+Challange an opponent to a 1v1 match (functionality incomplete):
+  -Select the "NFC Match" button on the bottom right
+
+[FEATURES]
+Spin counting: 
+  -Counts the number of spins your phone has made
+  -Works best on phones with gyroscopes. See http://stackoverflow.com/questions/4347143/which-android-phones-out-there-do-have-a-gyroscope
+Scoreboard:
+  -Displays highest scores for this phone
+Settings
+  -Username for high scores
+
+[TO DO]
+NFC Matches (will probably use Bluetooth instead since it seems more appropriate)
+  -Challenge an opponent to a 1v1 match
+Local friends scoreboard:
+  -Display highest score among "friends list"
+Global scoreboard (possible):
+  -Display highest global scores. Requires us to create a REST API on RackSpace/Heroku/etc.
+Friends list:
+  -List of friends to be used in friends scoreboard
+Still image:
+  -Image that spins with the phone.
+Sound effects
+  -Various sound effects for different user interactions
+
+[FIRST PARTY CODE]
 SpinCounter
-ScoreBoardActivity
-MainActivity
+  -Contains logic for monitoring the device's sensors and converting the data into information relevant to Spin Counter
 ScoreManager
-LocalScoreManager
+  -Interface for recording scores
+LocalScoreManager (implements ScoreManager)
+  -Used to record/persist local scores to the device
+ScoreBoardActivity
+  -Activity for viewing score board
+MainActivity
+  -Main screen of app
+
+[SECOND/THIRD PARTY CODE]
+Classes from external sources (mostly used for Bluetooth, which is not yet implemented):
+BluetoothFragment
+BlueToothService
+Constants
+DeviceListActivity
