@@ -17,11 +17,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import groupn.spin_counter.model.ScoreManager;
+import groupn.spin_counter.view.SpinnerView;
 
 
 public class MainActivity extends ActionBarActivity implements SpinCounter.SpinListener {
@@ -35,8 +38,8 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     //tracks if this is the first time the user has run the app
     private boolean mIsFirstTime;
 
-    private Button mSpinButton;
-    private TextView mSpinCountTextView;
+    private SpinnerView mSpinnerView;
+
     private int mCurrentNumberOfSpins;
 
     private SpinCounter mSpinCounter;
@@ -48,6 +51,30 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // =============
+        //
+        // Model setup
+        //
+        // =============
+        mScoreManager = ScoreManager.getInstance(ScoreManager.Type.Local);
+        mScoreManager.setContext(getApplicationContext());
+
+        mSpinCounter = new SpinCounter(this);
+        mSpinCounter.registerListener(this);
+
+        mCurrentNumberOfSpins = 0;
+
+        mPrefs = getSharedPreferences("sc_prefs", MODE_PRIVATE);
+        mIsFirstTime = mPrefs.getBoolean("mIsFirstTime", true);
+        mUsername = mPrefs.getString("mUsername", "New User");
+        mUser = mUsername;
+
+        // =============
+        //
+        // View setup
+        //
+        // =============
 
         Button scoreBoardButton = (Button)findViewById (R.id.scoreboard_button);
         scoreBoardButton.setOnClickListener (new View.OnClickListener() {
@@ -67,34 +94,28 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             }
         });
 
-        mScoreManager = ScoreManager.getInstance(ScoreManager.Type.Local);
-        mScoreManager.setContext(getApplicationContext());
+        mSpinnerView = makeSpinnerView ();
+        mSpinnerView.setCountdownListener(mCountdownListener);
+        ((RelativeLayout)findViewById(R.id.main)).addView(mSpinnerView);
 
-        mSpinCounter = new SpinCounter(this);
-        mSpinCounter.registerListener(this);
-        mSpinButton = (Button)findViewById(R.id.start_spin);
-        mSpinButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startSpinSession();
-            }
-        });
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        mSpinCountTextView = (TextView)findViewById(R.id.spin_count);
-        mCurrentNumberOfSpins = 0;
-
-        mPrefs = getSharedPreferences("sc_prefs", MODE_PRIVATE);
-        mIsFirstTime = mPrefs.getBoolean("mIsFirstTime", true);
-        mUsername = mPrefs.getString("mUsername", "New User");
-        mUser = mUsername;
+        // prompt for username entry
         if(mIsFirstTime) {
             Log.d(mUsername, "First time running the app");
             showDialog(DIALOG_ALERT);
         }
         else
             Log.d("Username = ", mUsername);
+    }
 
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+    private SpinnerView makeSpinnerView () {
+        SpinnerView result = new SpinnerView (this);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.addRule (RelativeLayout.CENTER_HORIZONTAL);
+        params.addRule (RelativeLayout.CENTER_VERTICAL);
+        result.setLayoutParams (params);
+        return result;
     }
 
     @Override
@@ -168,48 +189,31 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         return super.onCreateDialog(id);
     }
 
-    private void startSpinSession() {
-        mSpinButton.setVisibility(View.GONE);
-        mSpinCountTextView.setVisibility((View.VISIBLE));
-        mSpinCountTextView.setRotation(0.0f);
-        mSpinCounter.prep();
-        mSpinCountTextView.setText("3");
-        new CountDownTimer(3100, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                mSpinCountTextView.setText(Long.toString(millisUntilFinished / 1000));
-            }
-
-            @Override
-            public void onFinish() {
-                mSpinCountTextView.setText(R.string.go);
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mSpinCounter.start();
-                    }
-                }, 250);
-            }
-        }.start();
-    }
-
     @Override
     public void onUpdate(float totalDegrees) {
         mCurrentNumberOfSpins = Math.abs((int)(totalDegrees/360.0f));
-        mSpinCountTextView.setText(Integer.toString(mCurrentNumberOfSpins));
-        mSpinCountTextView.setRotation(-totalDegrees);
+        mSpinnerView.setNumberOfSpins(mCurrentNumberOfSpins);
+        mSpinnerView.setRotation(-totalDegrees);
     }
 
     @Override
     public void done() {
         mSpinCounter.stop();
-        mSpinButton.setVisibility(View.VISIBLE);
-        mSpinCountTextView.setVisibility((View.GONE));
+        mSpinnerView.reset();
 
-        Log.d (TAG, "adding spins");
         mScoreManager.reportSpins(mUsername,mCurrentNumberOfSpins);
     }
+
+    private final SpinnerView.CountdownListener mCountdownListener = new SpinnerView.CountdownListener() {
+        @Override
+        public void countdownStarted() {
+            mSpinCounter.prep();
+        }
+        @Override
+        public void countdownFinished() {
+            mSpinCounter.start();
+        }
+    };
 
     private final class CancelOnClickListener implements
             DialogInterface.OnClickListener {
