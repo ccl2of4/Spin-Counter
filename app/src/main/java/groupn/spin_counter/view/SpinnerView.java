@@ -159,6 +159,7 @@ public class SpinnerView extends RelativeLayout {
                     public void run () {
                         mCountdownTextView.setVisibility (View.GONE);
                         mSpinsTextView.setVisibility (View.VISIBLE);
+                        setNumberOfSpins (0);
 
                         if (mCountdownListener != null) {
                             mCountdownListener.countdownFinished ();

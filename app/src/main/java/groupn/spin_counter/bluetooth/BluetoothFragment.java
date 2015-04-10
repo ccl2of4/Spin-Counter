@@ -40,10 +40,13 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import groupn.spin_counter.R;
+import groupn.spin_counter.SpinCounter;
+import groupn.spin_counter.view.SpinnerView;
 
 import static groupn.spin_counter.MainActivity.getUName;
 
@@ -63,20 +66,13 @@ public class BluetoothFragment extends Fragment {
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
     private static final int REQUEST_ENABLE_BT = 3;
 
-    // Layout Views
-    private ListView mConversationView;
-    private EditText mOutEditText;
-    private Button mSendButton;
+    private SpinCounter mSpinCounter;
+    private SpinnerView mSpinnerView;
 
     /**
      * Name of the connected device
      */
     private String mConnectedDeviceName = null;
-
-    /**
-     * Array adapter for the message thread
-     */
-    private ArrayAdapter<String> mArrayAdapter;
 
     /**
      * String buffer for outgoing messages
@@ -106,8 +102,9 @@ public class BluetoothFragment extends Fragment {
             Toast.makeText(activity, "Bluetooth is not available", Toast.LENGTH_LONG).show();
             activity.finish();
         }
-    }
 
+        mSpinCounter = new SpinCounter (getActivity());
+    }
 
     @Override
     public void onStart() {
@@ -155,42 +152,36 @@ public class BluetoothFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        mConversationView = (ListView) view.findViewById(R.id.in);
-        mOutEditText = (EditText) view.findViewById(R.id.edit_text_out);
-        mSendButton = (Button) view.findViewById(R.id.button_send);
+        mSpinnerView = makeSpinnerView ();
+        mSpinnerView.setCountdownListener (mCountdownListener);
+        RelativeLayout layout = (RelativeLayout)getActivity().findViewById (R.id.bluetooth_main);
+        layout.addView (mSpinnerView);
     }
 
+    private SpinnerView makeSpinnerView () {
+        SpinnerView result = new SpinnerView(getActivity());
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.addRule(RelativeLayout.CENTER_HORIZONTAL);
+        params.addRule(RelativeLayout.CENTER_VERTICAL);
+        result.setLayoutParams(params);
+        return result;
+    }
 
+    private final SpinnerView.CountdownListener mCountdownListener = new SpinnerView.CountdownListener() {
+        @Override
+        public void countdownStarted() {
+            mSpinCounter.prep();
+        }
+        @Override
+        public void countdownFinished() {
+            mSpinCounter.start();
+        }
+    };
 
     /**
      * Set up the UI and background operations for chat.
      */
     private void setupChat() {
-        Log.d(TAG, "setupChat()");
-
-        // Initialize the array adapter for the conversation thread
-        mArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.message);
-
-        mConversationView.setAdapter(mArrayAdapter);
-
-        // Initialize the compose field with a listener for the return key
-        mOutEditText.setOnEditorActionListener(mWriteListener);
-
-        // Initialize the send button with a listener that for click events
-        mSendButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Send a message using content of the edit text widget
-                View view = getView();
-                if (null != view) {
-                    TextView textView = (TextView) view.findViewById(R.id.edit_text_out);
-                    String message = textView.getText().toString();
-                    sendMessage(message);
-                }
-
-                //Start of Spin Protocol//
-                sendMessage(""+getUName());
-            }
-        });
 
         // Initialize the BluetoothService to perform bluetooth connections
         mChatService = new BluetoothService(getActivity(), mHandler);
@@ -231,7 +222,6 @@ public class BluetoothFragment extends Fragment {
 
             // Reset out string buffer to zero and clear the edit text field
             mOutStringBuffer.setLength(0);
-            mOutEditText.setText(mOutStringBuffer);
         }
     }
 
@@ -296,7 +286,8 @@ public class BluetoothFragment extends Fragment {
                     switch (msg.arg1) {
                         case BluetoothService.STATE_CONNECTED:
                             setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
-                            mArrayAdapter.clear();
+
+                            // TODO: do something else here probably, idk
                             break;
                         case BluetoothService.STATE_CONNECTING:
                             setStatus(R.string.title_connecting);
@@ -307,21 +298,23 @@ public class BluetoothFragment extends Fragment {
                             break;
                     }
                     break;
+
+                // user just made a move
                 case Constants.MESSAGE_WRITE:
                     byte[] writeBuf = (byte[]) msg.obj;
                     // construct a string from the buffer
                     String writeMessage = new String(writeBuf);
-                    Log.d("SENT",writeMessage);
-                    mArrayAdapter.add("Me:  " + writeMessage);
 
+                    // TODO: do something with that information
                     break;
+
+                // opponent just made a move
                 case Constants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
-                    Log.d("RECIEVED",readMessage);
-                    mArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
 
+                    // TODO: do something with that information
                     break;
                 case Constants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name
