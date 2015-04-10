@@ -24,7 +24,7 @@
             android:label="@string/title_activity_score_board" >
         </activity>
         <activity
-            android:name=".NFCBrawlActivity"
+            android:name=".BluetoothBrawlActivity"
             android:label="@string/title_activity_nfcbrawl" >
         </activity>
 

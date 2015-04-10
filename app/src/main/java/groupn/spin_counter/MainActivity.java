@@ -2,26 +2,20 @@ package groupn.spin_counter;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.CountDownTimer;
-import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import groupn.spin_counter.model.ScoreManager;
 import groupn.spin_counter.view.SpinnerView;
@@ -89,7 +83,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         nfcButton.setOnClickListener (new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, NFCBrawlActivity.class));
+                startActivity(new Intent(MainActivity.this, BluetoothBrawlActivity.class));
                 overridePendingTransition(R.anim.push_right_in,R.anim.push_right_out);
             }
         });

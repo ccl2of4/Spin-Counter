@@ -122,6 +122,19 @@ public class SpinnerView extends RelativeLayout {
 
     /**
      *
+     * @return true if enabled, false otherwise. being disabled prevents the user from
+     * starting the countdown.
+     */
+    public boolean isEnabled () {
+        return mButton.isEnabled ();
+    }
+
+    public void setEnabled (boolean enabled) {
+        mButton.setEnabled (enabled);
+    }
+
+    /**
+     *
      * @return the number of spins currently being displayed
      */
     public int getNumberOfSpins () {
