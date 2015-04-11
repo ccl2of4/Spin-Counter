@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Handler;
@@ -61,6 +62,9 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
      */
     private BluetoothService mBluetoothService = null;
 
+    public String mSavedBluetoothAdapterName;
+    private SharedPreferences mPrefs;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +76,9 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
 
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mSavedBluetoothAdapterName = mBluetoothAdapter.getName();
+        mPrefs = getSharedPreferences("sc_prefs", MODE_PRIVATE);
+        mBluetoothAdapter.setName(mPrefs.getString("mUsername", mSavedBluetoothAdapterName));
 
         // If the adapter is null, then Bluetooth is not supported
         if (mBluetoothAdapter == null) {
@@ -129,6 +136,8 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "BluetoothBrawlActivity Destroying");
+        mBluetoothAdapter.setName(mSavedBluetoothAdapterName);
         if (mBluetoothService != null) {
             mBluetoothService.stop();
         }
@@ -355,7 +364,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         public void done () {
             mSpinCounter.stop();
             mSpinnerView.reset();
-            mSpinnerView.setRotation(0);
+
 
             //TODO tell the other player to go or report the game to the score manager
         }

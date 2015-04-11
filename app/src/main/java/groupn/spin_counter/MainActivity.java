@@ -215,8 +215,4 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         public void onClick(DialogInterface dialog, int which) {
         }
     }
-
-    public static String getUName(){
-        return mUser;
-    }
 }
