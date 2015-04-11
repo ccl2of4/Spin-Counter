@@ -355,6 +355,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         public void done () {
             mSpinCounter.stop();
             mSpinnerView.reset();
+            mSpinnerView.setRotation(0);
 
             //TODO tell the other player to go or report the game to the score manager
         }
