@@ -65,6 +65,11 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     public String mSavedBluetoothAdapterName;
     private SharedPreferences mPrefs;
 
+    private static String START_CODE = "1:";
+    private static String DONE_CODE = "2:";
+    private int mEnemyScore = -1;
+    private int mMyScore = -1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,6 +95,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         mSpinnerView.setCountdownListener (mCountdownListener);
         RelativeLayout layout = (RelativeLayout)findViewById (R.id.bluetooth_main_layout);
         layout.addView (mSpinnerView);
+        mSpinnerView.setEnabled(false);
 
         mSpinCounter = new SpinCounter (this);
         mSpinCounter.registerListener (mSpinListener);
@@ -151,6 +157,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
                 // Launch the DeviceListActivity to see devices and do scan
                 Intent serverIntent = new Intent(this, DeviceListActivity.class);
                 startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
+                mSpinnerView.setEnabled(true);
                 return true;
             }
             case R.id.discoverable: {
@@ -328,7 +335,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
                     byte[] readBuf = (byte[]) msg.obj;
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
-
+                    interpretMessage(readMessage);
                     // TODO: do something with that information
                     break;
                 case Constants.MESSAGE_DEVICE_NAME:
@@ -344,6 +351,33 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
             }
         }
     };
+
+    private void interpretMessage(String msg){
+        if(msg.startsWith(START_CODE)){
+            mSpinnerView.setEnabled(true);
+            Toast.makeText(BluetoothBrawlActivity.this, "YOUR TURN! GO!", Toast.LENGTH_SHORT).show();
+        }
+        else if(msg.startsWith(DONE_CODE)){
+            mEnemyScore = Integer.parseInt(msg.substring(2));
+            Toast.makeText(BluetoothBrawlActivity.this, "Their Score was: " + mEnemyScore, Toast.LENGTH_SHORT).show();
+            if(!isServer){
+                mSpinnerView.setEnabled(true);
+                sendMessage(DONE_CODE + mMyScore);
+            }
+            reportResult();
+        }
+    }
+
+    private void reportResult(){
+        if(mMyScore > mEnemyScore)
+            Toast.makeText(BluetoothBrawlActivity.this, "You WON! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
+        else if(mMyScore < mEnemyScore)
+            Toast.makeText(BluetoothBrawlActivity.this, "You LOST! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(BluetoothBrawlActivity.this, "TIE! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
+        mEnemyScore = -1;
+        mMyScore = -1;
+    }
 
     // ==================
     //
@@ -364,7 +398,14 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         public void done () {
             mSpinCounter.stop();
             mSpinnerView.reset();
-
+            mSpinnerView.setRotation(0);
+            if(!isServer)
+                sendMessage(START_CODE);
+            else {
+                sendMessage(DONE_CODE + mCurrentNumberOfSpins);
+            }
+            mSpinnerView.setEnabled(false);
+            mMyScore = mCurrentNumberOfSpins;
 
             //TODO tell the other player to go or report the game to the score manager
         }
