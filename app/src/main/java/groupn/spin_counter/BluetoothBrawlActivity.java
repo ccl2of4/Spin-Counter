@@ -41,6 +41,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
 
     private SpinCounter mSpinCounter;
     private SpinnerView mSpinnerView;
+    private ScoreManager mScoreManager;
 
     /**
      * Name of the connected device
@@ -65,10 +66,15 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     public String mSavedBluetoothAdapterName;
     private SharedPreferences mPrefs;
 
+    //start of message codes
     private static String START_CODE = "1:";
     private static String DONE_CODE = "2:";
+
+    //score result variables
     private int mEnemyScore = -1;
     private int mMyScore = -1;
+
+    private String mUsername;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,11 +85,16 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
             // does this matter?
         }
 
+        //instantiate score manager
+        mScoreManager = ScoreManager.getInstance(ScoreManager.Type.Local);
+        mScoreManager.setContext(getApplicationContext());
+
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mSavedBluetoothAdapterName = mBluetoothAdapter.getName();
         mPrefs = getSharedPreferences("sc_prefs", MODE_PRIVATE);
         mBluetoothAdapter.setName(mPrefs.getString("mUsername", mSavedBluetoothAdapterName));
+        mUsername = mBluetoothAdapter.getName();
 
         // If the adapter is null, then Bluetooth is not supported
         if (mBluetoothAdapter == null) {
@@ -99,6 +110,8 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
 
         mSpinCounter = new SpinCounter (this);
         mSpinCounter.registerListener (mSpinListener);
+        isServer=true;
+        Log.d(TAG,"isServer");
     }
 
     @Override
@@ -142,11 +155,9 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "BluetoothBrawlActivity Destroying");
         mBluetoothAdapter.setName(mSavedBluetoothAdapterName);
-        if (mBluetoothService != null) {
-            mBluetoothService.stop();
-        }
+        Log.d(TAG, "BluetoothBrawlActivity Destroying");
+        disconnect();
     }
 
     @Override
@@ -154,14 +165,17 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         switch (item.getItemId()) {
             case R.id.secure_connect_scan: {
                 isServer = false;
+                Log.d(TAG,"isClient");
                 // Launch the DeviceListActivity to see devices and do scan
                 Intent serverIntent = new Intent(this, DeviceListActivity.class);
                 startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
-                mSpinnerView.setEnabled(true);
+                //mSpinnerView.setEnabled(true);
                 return true;
             }
             case R.id.discoverable: {
                 isServer = true;
+                //mSpinnerView.setEnabled(false);
+                Log.d(TAG,"isServer");
                 // Ensure this device is discoverable by others
                 ensureDiscoverable();
                 return true;
@@ -196,6 +210,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        //isServer=true;
         overridePendingTransition(R.anim.push_left_in,R.anim.push_left_out);
     }
 
@@ -308,6 +323,10 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
                     switch (msg.arg1) {
                         case BluetoothService.STATE_CONNECTED:
                             setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
+                            if(!isServer) {
+                                Log.d(TAG, "isClient");
+                                mSpinnerView.setEnabled(true);
+                            }
 
                             // TODO: do something else here probably, idk
                             break;
@@ -345,6 +364,13 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
                             + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
                     break;
                 case Constants.MESSAGE_TOAST:
+                    if(msg.getData().getString(Constants.TOAST).equals("Unable to connect device") || msg.getData().getString(Constants.TOAST).equals("Device connection was lost")){
+                        Log.d(TAG,"isServer");
+                        isServer=true;
+                        mSpinnerView.setEnabled(false);
+                        //onBackPressed();
+                        disconnect();
+                    }
                     Toast.makeText(BluetoothBrawlActivity.this, msg.getData().getString(Constants.TOAST),
                             Toast.LENGTH_SHORT).show();
                     break;
@@ -354,10 +380,12 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
 
     private void interpretMessage(String msg){
         if(msg.startsWith(START_CODE)){
+            Log.d(TAG,"Starting");
             mSpinnerView.setEnabled(true);
             Toast.makeText(BluetoothBrawlActivity.this, "YOUR TURN! GO!", Toast.LENGTH_SHORT).show();
         }
         else if(msg.startsWith(DONE_CODE)){
+            Log.d(TAG,"Done");
             mEnemyScore = Integer.parseInt(msg.substring(2));
             Toast.makeText(BluetoothBrawlActivity.this, "Their Score was: " + mEnemyScore, Toast.LENGTH_SHORT).show();
             if(!isServer){
@@ -369,12 +397,19 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     }
 
     private void reportResult(){
-        if(mMyScore > mEnemyScore)
+        if(mMyScore > mEnemyScore) {
             Toast.makeText(BluetoothBrawlActivity.this, "You WON! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
-        else if(mMyScore < mEnemyScore)
+            mScoreManager.reportGame (mUsername, mMyScore, true);
+            mScoreManager.reportGame (mConnectedDeviceName, mEnemyScore, false);
+        }else if(mMyScore < mEnemyScore) {
             Toast.makeText(BluetoothBrawlActivity.this, "You LOST! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
-        else
+            mScoreManager.reportGame (mUsername, mMyScore, false);
+            mScoreManager.reportGame (mConnectedDeviceName, mEnemyScore, true);
+        }else {
             Toast.makeText(BluetoothBrawlActivity.this, "TIE! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
+            //mScoreManager.reportGame (mUsername, mMyScore, true);
+            //mScoreManager.reportGame (mConnectedDeviceName, mEnemyScore, true);
+        }
         mEnemyScore = -1;
         mMyScore = -1;
     }
@@ -447,5 +482,11 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         SensorManager mgr = (SensorManager) getSystemService(SENSOR_SERVICE);
         List<Sensor> sensors = mgr.getSensorList(Sensor.TYPE_ALL);
         return (mgr.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null);
+    }
+
+    private void disconnect(){
+        if (mBluetoothService != null) {
+            mBluetoothService.stop();
+        }
     }
 }
