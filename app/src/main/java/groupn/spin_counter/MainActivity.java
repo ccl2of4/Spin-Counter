@@ -9,8 +9,10 @@ import android.graphics.Color;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -39,6 +41,8 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private SpinCounter mSpinCounter;
     private ScoreManager mScoreManager;
 
+    private GestureDetector mGestureDetector;
+
     private final String TAG = "MainActivity";
 
     @Override
@@ -63,6 +67,8 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mIsFirstTime = mPrefs.getBoolean("mIsFirstTime", true);
         mUsername = mPrefs.getString("mUsername", "New User");
         mUser = mUsername;
+
+        mGestureDetector = new GestureDetector(this, new GestureListener());
 
         // =============
         //
@@ -110,6 +116,30 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         params.addRule (RelativeLayout.CENTER_VERTICAL);
         result.setLayoutParams (params);
         return result;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event)
+    {
+        //Returns true if the GestureDetector.OnGestureListener consumed the event, else false.
+        boolean eventConsumed=mGestureDetector.onTouchEvent(event);
+        if (eventConsumed)
+        {
+            Log.d("SWIPE", ""+GestureListener.swipeDirection);
+            if(GestureListener.swipeDirection == 0){
+                Log.d("SWIPED", "LEFT");
+                startActivity(new Intent(MainActivity.this, BluetoothBrawlActivity.class));
+                overridePendingTransition(R.anim.push_right_in,R.anim.push_right_out);
+            }
+            else if(GestureListener.swipeDirection == 1){
+                Log.d("SWIPED", "RIGHT");
+                startActivity(new Intent(MainActivity.this, ScoreBoardActivity.class));
+                overridePendingTransition(R.anim.push_left_in,R.anim.push_left_out);
+            }
+            return true;
+        }
+        else
+            return false;
     }
 
     @Override

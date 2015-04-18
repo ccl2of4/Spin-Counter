@@ -15,8 +15,10 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -75,6 +77,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     private int mMyScore = -1;
 
     private String mUsername;
+    private GestureDetector mGestureDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,6 +115,8 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         mSpinCounter.registerListener (mSpinListener);
         isServer=true;
         Log.d(TAG,"isServer");
+
+        mGestureDetector = new GestureDetector(this, new GestureListener());
     }
 
     @Override
@@ -205,6 +210,30 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
                     finish();
                 }
         }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event)
+    {
+        //Returns true if the GestureDetector.OnGestureListener consumed the event, else false.
+        boolean eventConsumed=mGestureDetector.onTouchEvent(event);
+        if (eventConsumed)
+        {
+            Log.d("SWIPE", ""+GestureListener.swipeDirection);
+            if(GestureListener.swipeDirection == 0){
+                Log.d("SWIPED", "LEFT");
+                //startActivity(new Intent(BluetoothBrawlActivity.this, ScoreBoardActivity.class));
+                //overridePendingTransition(R.anim.push_right_in,R.anim.push_right_out);
+            }
+            else if(GestureListener.swipeDirection == 1){
+                Log.d("SWIPED", "RIGHT");
+                startActivity(new Intent(BluetoothBrawlActivity.this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
+                overridePendingTransition(R.anim.push_left_in,R.anim.push_left_out);
+            }
+            return true;
+        }
+        else
+            return false;
     }
 
     @Override
