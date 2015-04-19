@@ -101,13 +101,13 @@ public class ScoreBoardActivity extends ActionBarActivity {
         if (eventConsumed)
         {
             Log.d("SWIPE", ""+GestureListener.swipeDirection);
-            if(GestureListener.swipeDirection == 0){
-                Log.d("SWIPED", "LEFT");
+            if(GestureListener.swipeDirection == 1){
+                Log.d("SWIPED", "RIGHT");
                 startActivity(new Intent(ScoreBoardActivity.this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP));
                 overridePendingTransition(R.anim.push_right_in,R.anim.push_right_out);
             }
-            else if(GestureListener.swipeDirection == 1){
-                Log.d("SWIPED", "RIGHT");
+            else if(GestureListener.swipeDirection == 0){
+                Log.d("SWIPED", "LEFT");
                 //startActivity(new Intent(ScoreBoardActivity.this, BluetoothBrawlActivity.class));
                 //overridePendingTransition(R.anim.push_left_in,R.anim.push_left_out);
             }
