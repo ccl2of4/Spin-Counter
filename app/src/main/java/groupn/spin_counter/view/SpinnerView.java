@@ -5,6 +5,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -58,7 +59,11 @@ public class SpinnerView extends RelativeLayout {
         mSpinsTextView = makeSpinsTextView ();
         mCountdownTextView = makeCountdownTextView ();
         mImageView = makeImageView ();
-
+        Typeface font = Typeface.createFromAsset(getContext().getAssets(), "fonts/orangejuice.otf");
+        mButton.setTypeface(font);
+        mSpinsTextView.setTypeface(font);
+        mCountdownTextView.setTypeface(font);
+        
         addView (mButton);
         addView (mSpinsTextView);
         addView (mCountdownTextView);

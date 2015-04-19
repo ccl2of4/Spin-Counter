@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import groupn.spin_counter.model.ScoreManager;
 import groupn.spin_counter.view.SpinnerView;
@@ -44,6 +46,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private GestureDetector mGestureDetector;
 
     private final String TAG = "MainActivity";
+    private Typeface font;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +73,8 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
 
         mGestureDetector = new GestureDetector(this, new GestureListener());
 
+        font = Typeface.createFromAsset(getAssets(), "fonts/orangejuice.otf");
+
         // =============
         //
         // View setup
@@ -77,6 +82,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         // =============
 
         Button scoreBoardButton = (Button)findViewById (R.id.scoreboard_button);
+        scoreBoardButton.setTypeface(font);
         scoreBoardButton.setOnClickListener (new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -86,6 +92,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         });
 
         Button nfcButton = (Button)findViewById (R.id.nfc_button);
+        nfcButton.setTypeface(font);
         nfcButton.setOnClickListener (new View.OnClickListener() {
             @Override
             public void onClick(View v) {
