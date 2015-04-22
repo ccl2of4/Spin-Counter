@@ -10,13 +10,13 @@
     <string name="go">Go!</string>
 
     <!-- score board -->
-    <string name="title_activity_score_board">ScoreBoardActivity</string>
+    <string name="title_activity_score_board">Leaderboard</string>
     <string name="score_board_name">Name</string>
     <string name="score_board_most_spins">Spins</string>
     <string name="score_board_games_played">Played</string>
     <string name="score_board_games_won">Won</string>
     <string name="score_board_games_lost">Lost</string>
-    <string name="title_activity_nfcbrawl">NFCBrawlActivity</string>
+    <string name="title_activity_nfcbrawl">Bluetooth Brawl</string>
 
     <!--  BluetoothChat -->
     <string name="send">Send</string>
