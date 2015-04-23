@@ -128,6 +128,11 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         }
         else
             Log.d("Username = ", mUsername);
+
+        if(findViewById(R.id.main).getTag().equals("large_screen")){
+            TextView title = (TextView)findViewById (R.id.textView);
+            title.setTypeface(font);
+        }
     }
 
     private SpinnerView makeSpinnerView () {
