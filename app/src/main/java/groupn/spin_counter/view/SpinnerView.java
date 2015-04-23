@@ -202,5 +202,5 @@ public class SpinnerView extends RelativeLayout {
     private static final int FONT_SIZE = 64;
     private static final int COUNTDOWN_DURATION = 3100;
     private static final int COUNTDOWN_TICKS = 1000;
-    private static final int RUN_DELAY = 250;
+    private static final int RUN_DELAY = 750;
 }

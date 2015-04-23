@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,6 +21,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 import groupn.spin_counter.model.ScoreManager;
 import groupn.spin_counter.view.SpinnerView;
@@ -48,6 +52,13 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private final String TAG = "MainActivity";
     private Typeface font;
 
+    private Handler mTimeChecker;
+    private boolean mIsTiming;
+    private Runnable mStopSession;
+
+    // constants
+    private static final int DISQUALIFICATION = 2500;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +74,9 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
 
         mSpinCounter = new SpinCounter(this);
         mSpinCounter.registerListener(this);
+
+        mTimeChecker = new Handler();
+        mIsTiming = false;
 
         mCurrentNumberOfSpins = 0;
 
@@ -222,9 +236,41 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
 
     @Override
     public void onUpdate(float totalDegrees) {
-        mCurrentNumberOfSpins = Math.abs((int)(totalDegrees/360.0f));
-        mSpinnerView.setNumberOfSpins(mCurrentNumberOfSpins);
-        mSpinnerView.setRotation(-totalDegrees);
+        int newSpins = Math.abs((int)(totalDegrees/360.0f));
+        if (newSpins < mCurrentNumberOfSpins) {
+            if (!mIsTiming) {
+                mIsTiming = true;
+                mStopSession = new Runnable() {
+                    @Override
+                    public void run() {
+                        mIsTiming = false;
+                        done();
+                    }
+                };
+                mTimeChecker.postDelayed(mStopSession, DISQUALIFICATION);
+            }
+        } else if (newSpins == mCurrentNumberOfSpins) {
+            if (!mIsTiming) {
+                mIsTiming = true;
+                mStopSession = new Runnable() {
+                    @Override
+                    public void run() {
+                        mIsTiming = false;
+                        done();
+                    }
+                };
+                mTimeChecker.postDelayed(mStopSession, DISQUALIFICATION);
+            }
+        } else
+        {
+            if (mIsTiming) {
+                mTimeChecker.removeCallbacks(mStopSession);
+                mIsTiming = false;
+            }
+            mCurrentNumberOfSpins = newSpins;
+            mSpinnerView.setNumberOfSpins(mCurrentNumberOfSpins);
+            mSpinnerView.setRotation(-totalDegrees);
+        }
     }
 
     @Override
