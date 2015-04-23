@@ -17,15 +17,13 @@
         android:id="@+id/nfc_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Bluetooth Match"
         android:elegantTextHeight="false"
         android:background="@android:color/holo_blue_bright"
         android:textColor="@android:color/black"
         android:layout_below="@+id/anchor"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="70dp"
-        android:textSize="20dp"
-        android:text="@string/main_bluetooth"
-        android:padding="5dp" />
+        android:layout_marginTop="60dp" />
 
     <Button
         android:id="@+id/scoreboard_button"
@@ -37,12 +35,7 @@
         android:layout_below="@+id/nfc_button"
         android:layout_centerHorizontal="true"
         android:layout_alignParentRight="false"
-        android:layout_marginTop="20dp"
-        android:textSize="20dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp" />
+        android:layout_marginTop="20dp" />
 
     <ImageView
         android:layout_width="wrap_content"
