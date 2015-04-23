@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.text.TextPaint;
@@ -53,7 +54,7 @@ public class SpinnerView extends RelativeLayout {
     }
 
     private void init(AttributeSet attrs, int defStyle) {
-        setBackgroundColor (getResources().getColor(android.R.color.holo_blue_bright));
+        //setBackgroundColor (getResources().getColor(android.R.color.holo_blue_bright));
 
         mButton = makeStartButton ();
         mSpinsTextView = makeSpinsTextView ();
@@ -63,8 +64,13 @@ public class SpinnerView extends RelativeLayout {
         mButton.setTypeface(font);
         mSpinsTextView.setTypeface(font);
         mCountdownTextView.setTypeface(font);
+        if(Build.VERSION.SDK_INT >=16) {
+            mButton.setBackground(getResources().getDrawable(R.drawable.rectangle));
+            mSpinsTextView.setBackground(getResources().getDrawable(R.drawable.rectangle));
+            mCountdownTextView.setBackground(getResources().getDrawable(R.drawable.rectangle));
+        }
         
-        addView (mButton);
+        addView(mButton);
         addView (mSpinsTextView);
         addView (mCountdownTextView);
         addView (mImageView);
