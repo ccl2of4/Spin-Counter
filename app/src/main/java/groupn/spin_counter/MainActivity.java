@@ -237,19 +237,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     @Override
     public void onUpdate(float totalDegrees) {
         int newSpins = Math.abs((int)(totalDegrees/360.0f));
-        if (newSpins < mCurrentNumberOfSpins) {
-            if (!mIsTiming) {
-                mIsTiming = true;
-                mStopSession = new Runnable() {
-                    @Override
-                    public void run() {
-                        mIsTiming = false;
-                        done();
-                    }
-                };
-                mTimeChecker.postDelayed(mStopSession, DISQUALIFICATION);
-            }
-        } else if (newSpins == mCurrentNumberOfSpins) {
+        if (newSpins <= mCurrentNumberOfSpins) {
             if (!mIsTiming) {
                 mIsTiming = true;
                 mStopSession = new Runnable() {
