@@ -65,7 +65,7 @@ public class SpinnerView extends RelativeLayout {
         mSpinsTextView.setTypeface(font);
         mCountdownTextView.setTypeface(font);
         if(Build.VERSION.SDK_INT >=16) {
-            mButton.setBackground(getResources().getDrawable(R.drawable.rectangle));
+            mButton.setBackground(getResources().getDrawable(R.drawable.button_skin));
             mSpinsTextView.setBackground(getResources().getDrawable(R.drawable.rectangle));
             mCountdownTextView.setBackground(getResources().getDrawable(R.drawable.rectangle));
         }
