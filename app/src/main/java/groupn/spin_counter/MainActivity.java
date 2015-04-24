@@ -2,11 +2,16 @@ package groupn.spin_counter;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -20,12 +25,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import groupn.spin_counter.model.ScoreManager;
 import groupn.spin_counter.view.SpinnerView;
 
 
-public class MainActivity extends ActionBarActivity implements SpinCounter.SpinListener {
+public class MainActivity extends ActionBarActivity implements SpinCounter.SpinListener, SensorEventListener {
     // constant for identifying the dialog
     private static final int DIALOG_ALERT = 10;
     //user name
@@ -128,6 +134,22 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         if(findViewById(R.id.main).getTag().equals("large_screen")){
             TextView title = (TextView)findViewById (R.id.textView);
             title.setTypeface(font);
+        }
+        SensorManager s = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+        if(s.registerListener(this,
+                s.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),
+                s.SENSOR_DELAY_NORMAL)) {
+            s.unregisterListener(this);
+        } else {
+            new AlertDialog.Builder(this).setTitle("No Gyroscope detected")
+                    .setMessage("This device has no gyroscope. Your spin detection may be buggy or inaccurate")
+                    .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //Do nothing
+                        }
+                    })
+                    .show();
         }
     }
 
@@ -270,19 +292,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mSpinnerView.setRotation(0);
 
         mScoreManager.reportSpins(mUsername,mCurrentNumberOfSpins);
-    }
-
-    @Override
-    public void noGyro() {
-        new AlertDialog.Builder(this).setTitle("No Gyroscope detected")
-                .setMessage("This device has no gyroscope. Your spin detection may be buggy or inaccurate")
-                .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //Do nothing
-                    }
-                })
-                .show();
+        mCurrentNumberOfSpins = 0;
     }
 
     private final SpinnerView.CountdownListener mCountdownListener = new SpinnerView.CountdownListener() {
@@ -295,6 +305,16 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             mSpinCounter.start();
         }
     };
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        //Do nothing
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        //Do nothing
+    }
 
     private final class CancelOnClickListener implements
             DialogInterface.OnClickListener {
