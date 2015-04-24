@@ -23,9 +23,10 @@
             android:text="@string/main_bluetooth"
             android:id="@+id/textView"
             android:layout_alignParentTop="true"
+            android:textSize="80dp"
+            android:textAlignment="center"
             android:layout_centerHorizontal="true"
-            android:textSize="50dp"
-            android:textAlignment="center" />
+            android:gravity="top|center_horizontal" />
     </RelativeLayout>
 
 </RelativeLayout>

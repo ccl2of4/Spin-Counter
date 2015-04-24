@@ -6,7 +6,12 @@
     </style>
 
     <style name="AppBaseTheme" parent="Theme.AppCompat.Light">
+        <item name="android:textSize">15sp</item>
         <item name="colorPrimary">@android:color/holo_blue_bright</item>
     </style>
 
+    <style name="DialogTheme" parent="@android:style/Theme.Holo.Dialog">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
 </resources>

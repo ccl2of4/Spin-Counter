@@ -124,6 +124,11 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         }
         else
             Log.d("Username = ", mUsername);
+
+        if(findViewById(R.id.main).getTag().equals("large_screen")){
+            TextView title = (TextView)findViewById (R.id.textView);
+            title.setTypeface(font);
+        }
     }
 
     private SpinnerView makeSpinnerView () {
@@ -234,6 +239,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     public void onUpdate(float totalDegrees) {
         int newSpins = Math.abs((int)(totalDegrees/360.0f));
         if (newSpins <= mCurrentNumberOfSpins) {
+            Log.d(TAG, "TRUE NEWSPINS " + newSpins + " oldspins: " + mCurrentNumberOfSpins );
             if (!mIsTiming) {
                 mIsTiming = true;
                 mStopSession = new Runnable() {
@@ -246,7 +252,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
                 mTimeChecker.postDelayed(mStopSession, DISQUALIFICATION);
             }
         } else
-        {
+        {Log.d(TAG, "FALSE NEWSPINS " + newSpins + " oldspins: "+ mCurrentNumberOfSpins );
             if (mIsTiming) {
                 mTimeChecker.removeCallbacks(mStopSession);
                 mIsTiming = false;

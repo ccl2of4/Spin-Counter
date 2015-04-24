@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Handler;
@@ -23,6 +24,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
@@ -80,6 +82,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
 
     private String mUsername;
     private GestureDetector mGestureDetector;
+    private Typeface font;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +122,10 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         Log.d(TAG,"isServer");
 
         mGestureDetector = new GestureDetector(this, new GestureListener());
+
+        font = Typeface.createFromAsset(getAssets(), "fonts/orangejuice.otf");
+        TextView nfcButton = (TextView)findViewById (R.id.textView);
+        nfcButton.setTypeface(font);
     }
 
     @Override
