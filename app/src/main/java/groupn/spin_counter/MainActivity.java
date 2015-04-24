@@ -2,10 +2,13 @@ package groupn.spin_counter;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.hardware.Sensor;
@@ -112,8 +115,21 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         nfcButton.setOnClickListener (new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, BluetoothBrawlActivity.class));
-                overridePendingTransition(R.anim.push_right_in,R.anim.push_right_out);
+                if( BluetoothAdapter.getDefaultAdapter() != null) {
+                    startActivity(new Intent(MainActivity.this, BluetoothBrawlActivity.class));
+                    overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
+                }
+                else{
+                    new AlertDialog.Builder(MainActivity.this, AlertDialog.THEME_DEVICE_DEFAULT_DARK).setTitle("No Bluetooth Detected")
+                            .setMessage("This device doesn't have Bluetooth: 2-Player Brawling is disabled.")
+                            .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    //Do nothing
+                                }
+                            })
+                            .show();
+                }
             }
         });
 
@@ -135,13 +151,16 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             TextView title = (TextView)findViewById (R.id.textView);
             title.setTypeface(font);
         }
+        if(findViewById(R.id.main).getTag().equals("tablet_screen")){
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
+        }
         SensorManager s = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
         if(s.registerListener(this,
                 s.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),
                 s.SENSOR_DELAY_NORMAL)) {
             s.unregisterListener(this);
         } else {
-            new AlertDialog.Builder(this).setTitle("No Gyroscope detected")
+            new AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_DARK).setTitle("No Gyroscope detected")
                     .setMessage("This device has no gyroscope. Your spin detection may be buggy or inaccurate")
                     .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
@@ -172,8 +191,21 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             Log.d("SWIPE", ""+GestureListener.swipeDirection);
             if(GestureListener.swipeDirection == 1){
                 Log.d("SWIPED", "RIGHT");
-                startActivity(new Intent(MainActivity.this, BluetoothBrawlActivity.class));
-                overridePendingTransition(R.anim.push_right_in,R.anim.push_right_out);
+                if( BluetoothAdapter.getDefaultAdapter() != null) {
+                    startActivity(new Intent(MainActivity.this, BluetoothBrawlActivity.class));
+                    overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
+                }
+                else{
+                    new AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_DARK).setTitle("No Bluetooth Detected")
+                            .setMessage("This device doesn't have Bluetooth: 2-Player Brawling is disabled.")
+                            .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    //Do nothing
+                                }
+                            })
+                            .show();
+                }
             }
             else if(GestureListener.swipeDirection == 0){
                 Log.d("SWIPED", "LEFT");

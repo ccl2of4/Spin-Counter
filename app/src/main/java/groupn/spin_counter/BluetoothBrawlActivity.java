@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -126,6 +127,10 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         font = Typeface.createFromAsset(getAssets(), "fonts/orangejuice.otf");
         TextView nfcButton = (TextView)findViewById (R.id.textView);
         nfcButton.setTypeface(font);
+
+        if(findViewById(R.id.bluetooth).getTag().equals("tablet_screen")){
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
+        }
     }
 
     @Override

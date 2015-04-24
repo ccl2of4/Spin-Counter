@@ -1,6 +1,7 @@
 package groupn.spin_counter;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -40,6 +41,9 @@ public class ScoreBoardActivity extends ActionBarActivity {
         populateTable ();
 
         mGestureDetector = new GestureDetector(this, new GestureListener());
+        if(findViewById(R.id.scoreboard).getTag().equals("tablet_screen")){
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
+        }
     }
 
     @Override
