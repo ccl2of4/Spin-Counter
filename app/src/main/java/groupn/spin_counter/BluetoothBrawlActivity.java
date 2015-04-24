@@ -2,8 +2,10 @@ package groupn.spin_counter;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.hardware.Sensor;
@@ -472,6 +474,19 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
             mMyScore = mCurrentNumberOfSpins;
 
             //TODO tell the other player to go or report the game to the score manager
+        }
+
+        @Override
+        public void noGyro() {
+            new AlertDialog.Builder(BluetoothBrawlActivity.this).setTitle("No Gyroscope detected")
+                    .setMessage("This device has no gyroscope. Your spin detection may be buggy or inaccurate")
+                    .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //Do nothing
+                        }
+                    })
+                    .show();
         }
     };
 

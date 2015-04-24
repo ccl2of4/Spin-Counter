@@ -20,10 +20,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 import groupn.spin_counter.model.ScoreManager;
 import groupn.spin_counter.view.SpinnerView;
@@ -268,6 +264,19 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mSpinnerView.setRotation(0);
 
         mScoreManager.reportSpins(mUsername,mCurrentNumberOfSpins);
+    }
+
+    @Override
+    public void noGyro() {
+        new AlertDialog.Builder(this).setTitle("No Gyroscope detected")
+                .setMessage("This device has no gyroscope. Your spin detection may be buggy or inaccurate")
+                .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //Do nothing
+                    }
+                })
+                .show();
     }
 
     private final SpinnerView.CountdownListener mCountdownListener = new SpinnerView.CountdownListener() {

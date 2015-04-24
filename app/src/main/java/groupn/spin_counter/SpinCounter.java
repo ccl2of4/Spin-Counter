@@ -45,6 +45,10 @@ public class SpinCounter implements SensorEventListener {
         if(!sensorManager.registerListener(this,
                 sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),
                 sensorManager.SENSOR_DELAY_UI)) {
+            for (SpinListener listener : listeners) {
+                listener.noGyro();
+                return;
+            }
             sensorManager.registerListener(this,
                     sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                     sensorManager.SENSOR_DELAY_UI);
@@ -148,5 +152,6 @@ public class SpinCounter implements SensorEventListener {
     public interface SpinListener {
         public void onUpdate(float totalDegrees);
         public void done();
+        public void noGyro();
     }
 }
