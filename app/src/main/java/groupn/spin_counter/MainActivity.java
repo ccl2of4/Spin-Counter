@@ -46,8 +46,12 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private SharedPreferences mPrefs;
     //tracks if this is the first time the user has run the app
     private boolean mIsFirstTime;
+    private boolean mHasSpun;
 
     private SpinnerView mSpinnerView;
+
+    private TextView mScore;
+    private TextView mHighscore;
 
     private int mCurrentNumberOfSpins;
 
@@ -107,6 +111,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
 
         mPrefs = getSharedPreferences("sc_prefs", MODE_PRIVATE);
         mIsFirstTime = mPrefs.getBoolean("mIsFirstTime", true);
+        mHasSpun = mPrefs.getBoolean("mHasSpun", false);
         mUsername = mPrefs.getString("mUsername", "New User");
         mIsMuted = mPrefs.getBoolean("mIsMuted", false);
         mUser = mUsername;
@@ -206,6 +211,21 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         if(findViewById(R.id.main).getTag().equals("tablet_screen")){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
         }
+
+        ((TextView)findViewById(R.id.ui_separator)).setTypeface(font);
+        ((TextView)findViewById(R.id.highscore)).setTypeface(font);
+        ((TextView)findViewById(R.id.score)).setTypeface(font);
+        mScore = (TextView)findViewById(R.id.score);
+        mHighscore = (TextView)findViewById(R.id.highscore);
+        if(mHasSpun) {
+            Log.d(TAG,"getting highscore");
+            mHighscore.setText("Your Highscore: " + mScoreManager.getMostSpins(mUsername));
+        }
+        else {
+            Log.d(TAG,"hasn't spun yet");
+            mHighscore.setText("Your Highscore: 0");
+        }
+
         SensorManager s = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
         if(s.registerListener(this,
                 s.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),
@@ -232,6 +252,11 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         result.setLayoutParams (params);
         return result;
     }
+    @Override
+    public void onResume(){
+        super.onResume();
+        //mScore.setVisibility(View.GONE);
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event)
@@ -247,6 +272,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
                 Log.d("SWIPE", "" + GestureListener.swipeDirection);
                 if (GestureListener.swipeDirection == 1) {
                     Log.d("SWIPED", "RIGHT");
+                    //error handling for emulators without bluetooth adapters
                     if (BluetoothAdapter.getDefaultAdapter() != null) {
                         startActivity(new Intent(MainActivity.this, BluetoothBrawlActivity.class));
                         overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
@@ -380,6 +406,10 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     @Override
     public void done() {
         mSpinCounter.stop();
+        if(!mHasSpun || mScoreManager.getMostSpins(mUsername) < mCurrentNumberOfSpins) {
+            Log.d(TAG,"NEW HIGHSCORE: " + mCurrentNumberOfSpins);
+            mHighscore.setText("Your Highscore: " + mCurrentNumberOfSpins);
+        }
         if (mInSpinSession) {
             mScoreManager.reportSpins(mUsername,mCurrentNumberOfSpins);
         }
@@ -393,6 +423,15 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mNfcButton.setVisibility(View.VISIBLE);
         mSpinnerView.reset();
         mSpinnerView.setRotation(0);
+
+        mScore.setVisibility(View.VISIBLE);
+        mScore.setText("Score: " + mCurrentNumberOfSpins);
+        if(!mHasSpun){
+            SharedPreferences.Editor ed = mPrefs.edit();
+            ed.putBoolean("mHasSpun", true);
+            ed.apply();
+            mHasSpun = true;
+        }
         mCurrentNumberOfSpins = 0;
     }
 
@@ -412,6 +451,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             mInSpinSession = true;
             mScoreBoardButton.setVisibility(View.GONE);
             mNfcButton.setVisibility(View.GONE);
+            mScore.setVisibility(View.GONE);
         }
     };
 
