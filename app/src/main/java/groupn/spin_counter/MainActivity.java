@@ -8,13 +8,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -50,6 +52,8 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private int mCurrentNumberOfSpins;
 
     private SpinCounter mSpinCounter;
+    private boolean mInSpinSession;
+    private boolean mInCountdown;
     private ScoreManager mScoreManager;
 
     private GestureDetector mGestureDetector;
@@ -60,6 +64,14 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private Handler mTimeChecker;
     private boolean mIsTiming;
     private Runnable mStopSession;
+
+    private Button mNfcButton, mScoreBoardButton;
+    private ImageButton mMuteButton;
+
+    private SoundPool mSounds;
+    private boolean mIsMuted;
+    private int[] mSoundIds;
+    private int[] mPlayingIds;
 
     // constants
     private static final int DISQUALIFICATION = 2500;
@@ -78,7 +90,14 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mScoreManager.setContext(getApplicationContext());
 
         mSpinCounter = new SpinCounter(this);
+        mInSpinSession = false;
+        mInCountdown = false;
         mSpinCounter.registerListener(this);
+
+        mSounds = new SoundPool(3, AudioManager.STREAM_MUSIC, 0);
+        mSoundIds = new int[3];
+        mPlayingIds = new int[3];
+        mSoundIds[0] = mSounds.load(this, R.raw.countdown, 1);
 
         mTimeChecker = new Handler();
         mIsTiming = false;
@@ -88,6 +107,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mPrefs = getSharedPreferences("sc_prefs", MODE_PRIVATE);
         mIsFirstTime = mPrefs.getBoolean("mIsFirstTime", true);
         mUsername = mPrefs.getString("mUsername", "New User");
+        mIsMuted = mPrefs.getBoolean("mIsMuted", false);
         mUser = mUsername;
 
         mGestureDetector = new GestureDetector(this, new GestureListener());
@@ -100,22 +120,28 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         //
         // =============
 
-        Button scoreBoardButton = (Button)findViewById (R.id.scoreboard_button);
-        scoreBoardButton.setTypeface(font);
-        scoreBoardButton.setOnClickListener (new View.OnClickListener() {
+        mScoreBoardButton = (Button)findViewById (R.id.scoreboard_button);
+        mScoreBoardButton.setTypeface(font);
+        mScoreBoardButton.setOnClickListener (new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (mInSpinSession || mInCountdown) {
+                    done();
+                }
                 startActivity(new Intent(MainActivity.this, ScoreBoardActivity.class));
                 overridePendingTransition(R.anim.push_left_in,R.anim.push_left_out);
             }
         });
 
-        Button nfcButton = (Button)findViewById (R.id.nfc_button);
-        nfcButton.setTypeface(font);
-        nfcButton.setOnClickListener (new View.OnClickListener() {
+        mNfcButton = (Button)findViewById (R.id.nfc_button);
+        mNfcButton.setTypeface(font);
+        mNfcButton.setOnClickListener (new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if( BluetoothAdapter.getDefaultAdapter() != null) {
+                    if (mInSpinSession || mInCountdown) {
+                        done();
+                    }
                     startActivity(new Intent(MainActivity.this, BluetoothBrawlActivity.class));
                     overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
                 }
@@ -132,6 +158,31 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
                 }
             }
         });
+
+        mMuteButton = (ImageButton)findViewById(R.id.mute_button);
+        mMuteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mIsMuted = !mIsMuted;
+                if (mIsMuted) {
+                    mSounds.autoPause();
+                    mMuteButton.setImageResource(R.drawable.mute);
+                } else {
+                    mMuteButton.setImageResource(R.drawable.unmute);
+                }
+
+                SharedPreferences.Editor ed = mPrefs.edit();
+                ed.putBoolean("mIsMuted",mIsMuted);
+                ed.apply();
+            }
+        });
+
+        if (mIsMuted) {
+            mSounds.autoPause();
+            mMuteButton.setImageResource(R.drawable.mute);
+        } else {
+            mMuteButton.setImageResource(R.drawable.unmute);
+        }
 
         mSpinnerView = makeSpinnerView ();
         mSpinnerView.setCountdownListener(mCountdownListener);
@@ -188,29 +239,32 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         boolean eventConsumed=mGestureDetector.onTouchEvent(event);
         if (eventConsumed)
         {
-            Log.d("SWIPE", ""+GestureListener.swipeDirection);
-            if(GestureListener.swipeDirection == 1){
-                Log.d("SWIPED", "RIGHT");
-                if( BluetoothAdapter.getDefaultAdapter() != null) {
-                    startActivity(new Intent(MainActivity.this, BluetoothBrawlActivity.class));
-                    overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
+            if (!mInSpinSession) {
+                if (mInCountdown) {
+                    done();
                 }
-                else{
-                    new AlertDialog.Builder(this,AlertDialog.THEME_DEVICE_DEFAULT_DARK).setTitle("No Bluetooth Detected")
-                            .setMessage("This device doesn't have Bluetooth: 2-Player Brawling is disabled.")
-                            .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    //Do nothing
-                                }
-                            })
-                            .show();
+                Log.d("SWIPE", "" + GestureListener.swipeDirection);
+                if (GestureListener.swipeDirection == 1) {
+                    Log.d("SWIPED", "RIGHT");
+                    if (BluetoothAdapter.getDefaultAdapter() != null) {
+                        startActivity(new Intent(MainActivity.this, BluetoothBrawlActivity.class));
+                        overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
+                    } else {
+                        new AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_DARK).setTitle("No Bluetooth Detected")
+                                .setMessage("This device doesn't have Bluetooth: 2-Player Brawling is disabled.")
+                                .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        //Do nothing
+                                    }
+                                })
+                                .show();
+                    }
+                } else if (GestureListener.swipeDirection == 0) {
+                    Log.d("SWIPED", "LEFT");
+                    startActivity(new Intent(MainActivity.this, ScoreBoardActivity.class));
+                    overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
                 }
-            }
-            else if(GestureListener.swipeDirection == 0){
-                Log.d("SWIPED", "LEFT");
-                startActivity(new Intent(MainActivity.this, ScoreBoardActivity.class));
-                overridePendingTransition(R.anim.push_left_in,R.anim.push_left_out);
             }
             return true;
         }
@@ -221,7 +275,9 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     @Override
     public void onPause() {
         super.onPause();
-        mSpinCounter.stop();
+        if (mInSpinSession || mInCountdown) {
+            done();
+        }
     }
 
     @Override
@@ -313,28 +369,45 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             }
             mCurrentNumberOfSpins = newSpins;
             mSpinnerView.setNumberOfSpins(mCurrentNumberOfSpins);
-            mSpinnerView.setRotation(-totalDegrees);
         }
+        mSpinnerView.setRotation(-totalDegrees);
     }
 
     @Override
     public void done() {
         mSpinCounter.stop();
+        if (mInSpinSession) {
+            mScoreManager.reportSpins(mUsername,mCurrentNumberOfSpins);
+        }
+        if (mInCountdown) {
+            mSounds.stop(mPlayingIds[0]);
+            mSpinnerView.cancel();
+        }
+        mInSpinSession = false;
+        mInCountdown = false;
+        mScoreBoardButton.setVisibility(View.VISIBLE);
+        mNfcButton.setVisibility(View.VISIBLE);
         mSpinnerView.reset();
         mSpinnerView.setRotation(0);
-
-        mScoreManager.reportSpins(mUsername,mCurrentNumberOfSpins);
         mCurrentNumberOfSpins = 0;
     }
 
     private final SpinnerView.CountdownListener mCountdownListener = new SpinnerView.CountdownListener() {
         @Override
         public void countdownStarted() {
+            if (!mIsMuted) {
+                mPlayingIds[0] = mSounds.play(mSoundIds[0], 1, 1, 1, 0, 1.0f);
+            }
+            mInCountdown = true;
             mSpinCounter.prep();
         }
         @Override
         public void countdownFinished() {
             mSpinCounter.start();
+            mInCountdown = false;
+            mInSpinSession = true;
+            mScoreBoardButton.setVisibility(View.GONE);
+            mNfcButton.setVisibility(View.GONE);
         }
     };
 

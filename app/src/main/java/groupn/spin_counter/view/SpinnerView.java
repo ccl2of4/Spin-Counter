@@ -131,6 +131,12 @@ public class SpinnerView extends RelativeLayout {
         mButton.setVisibility (View.VISIBLE);
     }
 
+    public void cancel () {
+        if (mCountDownTimer != null) {
+            mCountDownTimer.cancel();
+        }
+    }
+
     /**
      *
      * @return true if enabled, false otherwise. being disabled prevents the user from
@@ -160,14 +166,14 @@ public class SpinnerView extends RelativeLayout {
      * starts the countdown
      */
     private void startCountdown () {
-        mButton.setVisibility (View.GONE);
-        mCountdownTextView.setVisibility (View.VISIBLE);
-
         if (mCountdownListener != null) {
             mCountdownListener.countdownStarted ();
         }
+        mButton.setVisibility (View.GONE);
+        mCountdownTextView.setVisibility (View.VISIBLE);
 
-        new CountDownTimer (COUNTDOWN_DURATION, COUNTDOWN_TICKS) {
+
+        mCountDownTimer = new CountDownTimer (COUNTDOWN_DURATION, COUNTDOWN_TICKS) {
             @Override
             public void onTick (long millisUntilFinished) {
                 mCountdownTextView.setText (Long.toString (millisUntilFinished/COUNTDOWN_TICKS));
@@ -200,6 +206,7 @@ public class SpinnerView extends RelativeLayout {
     private TextView mCountdownTextView;
     private ImageView mImageView;
     private CountdownListener mCountdownListener;
+    private CountDownTimer mCountDownTimer;
 
     // logging
     private static final String TAG = "SpinnerView";
