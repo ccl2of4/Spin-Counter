@@ -13,6 +13,8 @@ import android.os.Handler;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,9 +73,28 @@ public class SpinnerView extends RelativeLayout {
         }
         
         addView(mButton);
+        addView (mImageView);
         addView (mSpinsTextView);
         addView (mCountdownTextView);
-        addView (mImageView);
+
+        RelativeLayout.LayoutParams imageParams =
+                (RelativeLayout.LayoutParams)mImageView.getLayoutParams();
+        imageParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+        imageParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                IMG_SIZE, getResources().getDisplayMetrics());
+        imageParams.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                IMG_SIZE, getResources().getDisplayMetrics());
+        mImageView.setLayoutParams(imageParams);
+
+        RelativeLayout.LayoutParams spinsParams =
+                (RelativeLayout.LayoutParams)mSpinsTextView.getLayoutParams();
+        spinsParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
+        spinsParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                TEXT_BOX_SIZE, getResources().getDisplayMetrics());
+        spinsParams.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                TEXT_BOX_SIZE, getResources().getDisplayMetrics());
+        mSpinsTextView.setLayoutParams(spinsParams);
+
 
         mButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -95,6 +116,7 @@ public class SpinnerView extends RelativeLayout {
 
     private TextView makeSpinsTextView () {
         TextView result = new TextView (getContext ());
+        result.setGravity(Gravity.CENTER);
         result.setTextSize(FONT_SIZE);
         return result;
     }
@@ -107,6 +129,7 @@ public class SpinnerView extends RelativeLayout {
 
     private ImageView makeImageView () {
         ImageView result = new ImageView (getContext ());
+        result.setImageResource(R.drawable.optical_illusion);
         return result;
     }
 
@@ -128,6 +151,7 @@ public class SpinnerView extends RelativeLayout {
     public void reset () {
         mSpinsTextView.setVisibility (View.GONE);
         mCountdownTextView.setVisibility (View.GONE);
+        mImageView.setVisibility (View.GONE);
         mButton.setVisibility (View.VISIBLE);
     }
 
@@ -189,7 +213,8 @@ public class SpinnerView extends RelativeLayout {
                     public void run () {
                         mCountdownTextView.setVisibility (View.GONE);
                         mSpinsTextView.setVisibility (View.VISIBLE);
-                        setNumberOfSpins (0);
+                        mImageView.setVisibility(View.VISIBLE);
+                        setNumberOfSpins(0);
 
                         if (mCountdownListener != null) {
                             mCountdownListener.countdownFinished ();
@@ -216,4 +241,6 @@ public class SpinnerView extends RelativeLayout {
     private static final int COUNTDOWN_DURATION = 3100;
     private static final int COUNTDOWN_TICKS = 1000;
     private static final int RUN_DELAY = 750;
+    private static final int IMG_SIZE = 450;
+    private static final int TEXT_BOX_SIZE = 95;
 }

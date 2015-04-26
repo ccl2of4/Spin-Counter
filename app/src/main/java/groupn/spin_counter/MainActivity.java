@@ -98,6 +98,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mSoundIds = new int[3];
         mPlayingIds = new int[3];
         mSoundIds[0] = mSounds.load(this, R.raw.countdown, 1);
+        mSoundIds[1] = mSounds.load(this, R.raw.swoosh, 1);
 
         mTimeChecker = new Handler();
         mIsTiming = false;
@@ -366,6 +367,9 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             if (mIsTiming) {
                 mTimeChecker.removeCallbacks(mStopSession);
                 mIsTiming = false;
+            }
+            if (!mIsMuted) {
+                mPlayingIds[1] = mSounds.play(mSoundIds[1], 1, 1, 1, 0, 1.0f);
             }
             mCurrentNumberOfSpins = newSpins;
             mSpinnerView.setNumberOfSpins(mCurrentNumberOfSpins);
