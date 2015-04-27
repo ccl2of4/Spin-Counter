@@ -255,7 +255,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     @Override
     public void onResume(){
         super.onResume();
-        //mScore.setVisibility(View.GONE);
+        mScore.setVisibility(View.GONE);
     }
 
     @Override
@@ -408,7 +408,11 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mSpinCounter.stop();
         if(!mHasSpun || mScoreManager.getMostSpins(mUsername) < mCurrentNumberOfSpins) {
             Log.d(TAG,"NEW HIGHSCORE: " + mCurrentNumberOfSpins);
+            mHighscore.setVisibility(View.VISIBLE);
             mHighscore.setText("Your Highscore: " + mCurrentNumberOfSpins);
+        }
+        else{
+            mHighscore.setVisibility(View.VISIBLE);
         }
         if (mInSpinSession) {
             mScoreManager.reportSpins(mUsername,mCurrentNumberOfSpins);
@@ -452,6 +456,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             mScoreBoardButton.setVisibility(View.GONE);
             mNfcButton.setVisibility(View.GONE);
             mScore.setVisibility(View.GONE);
+            mHighscore.setVisibility(View.GONE);
         }
     };
 

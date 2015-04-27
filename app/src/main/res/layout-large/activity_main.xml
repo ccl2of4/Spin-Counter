@@ -79,19 +79,22 @@
         android:visibility="invisible"
         android:textSize="40dp"
         android:textColor="#ff000000"
-        android:layout_below="@+id/textView"
-        android:layout_alignRight="@+id/highscore"
-        android:layout_alignEnd="@+id/highscore" />
+        android:layout_below="@+id/ui_separator"
+        android:layout_marginTop="25dp"
+        android:layout_alignLeft="@+id/highscore"
+        android:layout_alignStart="@+id/highscore" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Your High Score: "
+        android:text="Your Highscore: "
         android:id="@+id/highscore"
-        android:textSize="20dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true" />
+        android:textSize="40dp"
+        android:layout_below="@+id/textView"
+        android:layout_marginTop="15dp"
+        android:layout_alignLeft="@+id/ui_separator"
+        android:layout_alignStart="@+id/ui_separator"/>
 
     <ImageButton
         android:id="@+id/mute_button"
