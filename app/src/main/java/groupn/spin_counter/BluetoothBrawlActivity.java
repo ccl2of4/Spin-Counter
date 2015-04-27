@@ -3,12 +3,14 @@ package groupn.spin_counter;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -18,12 +20,16 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.InputType;
+import android.text.method.DigitsKeyListener;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -84,6 +90,10 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     private String mUsername;
     private GestureDetector mGestureDetector;
     private Typeface font;
+    private int mDiscoverable;
+
+    // constant for identifying the dialog
+    private static final int DIALOG_ALERT = 11;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,6 +120,8 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
             Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
             finish();
         }
+
+        mDiscoverable = mPrefs.getInt("mDiscoverable",300);
 
         mSpinnerView = makeSpinnerView ();
         mSpinnerView.setCountdownListener (mCountdownListener);
@@ -199,6 +211,9 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
                 ensureDiscoverable();
                 return true;
             }
+            case R.id.discoverable_length:
+                showDialog(DIALOG_ALERT);
+                return true;
         }
         return false;
     }
@@ -292,7 +307,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         if (mBluetoothAdapter.getScanMode() !=
                 BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
             Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, mDiscoverable);
             startActivity(discoverableIntent);
         }
     }
@@ -484,8 +499,6 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
             }
             mSpinnerView.setEnabled(false);
             mMyScore = mCurrentNumberOfSpins;
-
-            //TODO tell the other player to go or report the game to the score manager
         }
     };
 
@@ -530,6 +543,48 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     private void disconnect(){
         if (mBluetoothService != null) {
             mBluetoothService.stop();
+        }
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        switch (id) {
+            case DIALOG_ALERT:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_DARK).
+                        setMessage("Choose How Long Bluetooth Stays Discoverable:").
+                        setCancelable(true);
+                // Set an EditText view to get user input
+                final EditText input = new EditText(this);
+                input.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                input.setInputType(3);
+                input.setKeyListener(DigitsKeyListener.getInstance("0123456789"));
+                input.setFilters(new InputFilter[]{new InputFilterMinMax(0, 300)});
+                input.setTextColor(Color.parseColor("#ffffffff"));
+                Log.d("Discoverable Length", "0-300 seconds");
+                input.setHint("0-300 seconds");
+                input.setHintTextColor(Color.GRAY);
+                builder.setView(input);
+                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        SharedPreferences.Editor ed = mPrefs.edit();
+                        int value = Integer.parseInt(input.getText().toString());
+                        mDiscoverable = value;
+                        ed.putInt("mDiscoverable", value);
+                        Log.d("VALUE", "" + value);
+                        ed.apply();
+                        return;
+                    }
+                });
+                builder.setNegativeButton("Nope", new CancelOnClickListener());
+                AlertDialog dialog = builder.create();
+                dialog.show();
+        }
+        return super.onCreateDialog(id);
+    }
+
+    private final class CancelOnClickListener implements
+            DialogInterface.OnClickListener {
+        public void onClick(DialogInterface dialog, int which) {
         }
     }
 }

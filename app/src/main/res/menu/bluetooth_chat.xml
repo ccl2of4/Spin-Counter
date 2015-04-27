@@ -22,6 +22,9 @@
         app:showAsAction="ifRoom"
         android:title="@string/secure_connect"/>
 
+    <item android:id="@+id/discoverable_length"
+        android:title="Set Discoverable length"
+        app:showAsAction="never"/>
     <item
         android:id="@+id/discoverable"
         app:showAsAction="never"
