@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -21,6 +22,7 @@ import android.preference.EditTextPreference;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -236,6 +238,17 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             }
         });
 
+        // handles text scaling down for smaller screens
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+        int height = size.y;
+        Log.d("SCREEN SIZE", "WIDTH: " + width + " HEIGHT: "+ height);
+        if(width <= 480){
+            ((TextView) findViewById(R.id.ui_separator)).setText(R.string.dashed_line_short);
+            ((TextView) findViewById(R.id.highscore)).setTextSize(35);
+        }
     }
 
     private void finishedLaunching() {
@@ -280,7 +293,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
 
     private void updateHighScore () {
         if (mUser != null) {
-            mHighscore.setText ("Your High score: " + mUser.maxSpins);
+            mHighscore.setText ("Your Highscore: " + mUser.maxSpins);
         }
     }
 

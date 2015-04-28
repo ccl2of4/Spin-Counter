@@ -61,7 +61,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="-----------------------------------"
+        android:text="@string/dashed_line_long"
         android:id="@+id/ui_separator"
         android:textSize="40dp"
         android:layout_marginTop="90dp"

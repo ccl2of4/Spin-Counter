@@ -1,6 +1,8 @@
 package groupn.spin_counter.view;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -70,6 +72,19 @@ public class SpinnerView extends RelativeLayout {
             mButton.setBackground(getResources().getDrawable(R.drawable.button_skin));
             mSpinsTextView.setBackground(getResources().getDrawable(R.drawable.rectangle));
             mCountdownTextView.setBackground(getResources().getDrawable(R.drawable.rectangle));
+        }
+        else {
+            Log.d(TAG,"API level 15; does not support setBackground method");
+            new AlertDialog.Builder(getContext(),AlertDialog.THEME_DEVICE_DEFAULT_DARK).setTitle(R.string.api_warning_title)
+                    .setMessage(R.string.api_lvl)
+                    .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            //Do nothing
+                        }
+                    })
+                    .show();
+            mButton.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_bright));
         }
         
         addView(mButton);

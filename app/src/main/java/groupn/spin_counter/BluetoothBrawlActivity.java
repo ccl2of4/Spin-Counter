@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Typeface;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -24,6 +25,7 @@ import android.text.InputFilter;
 import android.text.InputType;
 import android.text.method.DigitsKeyListener;
 import android.util.Log;
+import android.view.Display;
 import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -142,6 +144,17 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
 
         if(findViewById(R.id.bluetooth).getTag().equals("tablet_screen")){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
+        }
+
+        // handles text scaling down for smaller screens
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+        int height = size.y;
+        Log.d("SCREEN SIZE", "WIDTH: " + width + " HEIGHT: "+ height);
+        if(width <= 480){
+            ((TextView) findViewById(R.id.textView)).setTextSize(40);
         }
     }
 
