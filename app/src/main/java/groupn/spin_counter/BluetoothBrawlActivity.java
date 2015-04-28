@@ -40,7 +40,7 @@ import groupn.spin_counter.R;
 import groupn.spin_counter.bluetooth.BluetoothService;
 import groupn.spin_counter.bluetooth.Constants;
 import groupn.spin_counter.bluetooth.DeviceListActivity;
-import groupn.spin_counter.model.ScoreManager;
+import groupn.spin_counter.model.DataRepository;
 import groupn.spin_counter.view.SpinnerView;
 
 public class BluetoothBrawlActivity extends ActionBarActivity {
@@ -54,7 +54,6 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
 
     private SpinCounter mSpinCounter;
     private SpinnerView mSpinnerView;
-    private ScoreManager mScoreManager;
 
     /**
      * Name of the connected device
@@ -92,6 +91,8 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     private Typeface font;
     private int mDiscoverable;
 
+    private DataRepository mDataRepository;
+
     // constant for identifying the dialog
     private static final int DIALOG_ALERT = 11;
 
@@ -105,8 +106,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         }
 
         //instantiate score manager
-        mScoreManager = ScoreManager.getInstance(ScoreManager.Type.Local);
-        mScoreManager.setContext(getApplicationContext());
+        mDataRepository = DataRepository.getInstance(DataRepository.Type.Global, getApplicationContext());
 
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -457,16 +457,19 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     private void reportResult(){
         if(mMyScore > mEnemyScore) {
             Toast.makeText(BluetoothBrawlActivity.this, "You WON! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
-            mScoreManager.reportGame (mUsername, mMyScore, true);
-            mScoreManager.reportGame (mConnectedDeviceName, mEnemyScore, false);
+
+            // ADD IN REPORT GAME HERE
+
         }else if(mMyScore < mEnemyScore) {
             Toast.makeText(BluetoothBrawlActivity.this, "You LOST! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
-            mScoreManager.reportGame (mUsername, mMyScore, false);
-            mScoreManager.reportGame (mConnectedDeviceName, mEnemyScore, true);
+
+            // ADD IN REPORT GAME HERE
+
         }else {
             Toast.makeText(BluetoothBrawlActivity.this, "TIE! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
-            //mScoreManager.reportGame (mUsername, mMyScore, true);
-            //mScoreManager.reportGame (mConnectedDeviceName, mEnemyScore, true);
+
+            // ADD IN REPORT GAME HERE
+
         }
         mEnemyScore = -1;
         mMyScore = -1;

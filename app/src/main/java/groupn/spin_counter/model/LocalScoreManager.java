@@ -1,5 +1,6 @@
 package groupn.spin_counter.model;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.File;
@@ -14,17 +15,21 @@ import java.util.Set;
 
 /**
  * Created by connor on 3/27/15.
+ *
+ *
+ *
+ * UNUSED CLASS
+ *
+ *
  */
-class LocalScoreManager extends ScoreManager {
+class LocalScoreManager {
 
-    @Override
     public void reportSpins (String user, int spins) {
         if (updateSpins (user, spins)) {
             storeData (getData ());
         }
     }
 
-    @Override
     public void reportGame (String user, int spins, boolean won) {
         //use the bitwise or to avoid short-circuit evaluation
         if (updateSpins (user, spins) | updateGames (user, won)) {
@@ -32,22 +37,18 @@ class LocalScoreManager extends ScoreManager {
         }
     }
 
-    @Override
     public Set<String> getAllUsers () {
         return getData().keySet();
     }
 
-    @Override
     public int getMostSpins (String user) {
         return (Integer)getData().get(user).get (MOST_SPINS_KEY);
     }
 
-    @Override
     public int getGamesPlayed (String user) {
         return (Integer)getData().get(user).get (GAMES_PLAYED_KEY);
     }
 
-    @Override
     public int getGamesWon (String user) {
         return (Integer)getData().get(user).get (GAMES_WON_KEY);
     }
@@ -81,6 +82,8 @@ class LocalScoreManager extends ScoreManager {
     // Private
     //
     // ============
+
+    private Context getContext () { return null; }
 
     private static final String MOST_SPINS_KEY = "most spins key";
     private static final String GAMES_PLAYED_KEY = "games played key";

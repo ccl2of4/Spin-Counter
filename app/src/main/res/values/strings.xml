@@ -9,6 +9,16 @@
     <string name="main_bluetooth">Bluetooth Brawl</string>
     <string name="start_spin">Spin</string>
     <string name="go">Go!</string>
+    <!-- username create/change dialogs -->
+    <string name="no_username">Please enter a username in order to use the app</string>
+    <string name="no_username_network_error">There was a network error processing your request. Please try again</string>
+    <string name="no_username_username_taken">The username you have entered is taken. Please try another</string>
+    <string name="change_username">Change your username</string>
+    <string name="change_username_network_error">There was a network error processing your request. Please try again</string>
+    <string name="change_username_username_taken">The username you have entered is taken. Please try another</string>
+    <string name="no_username_accept_button">Set username</string>
+    <string name="change_username_accept_button">Change username</string>
+    <string name="username_cancel_button">Never mind</string>
 
     <!-- score board -->
     <string name="title_activity_score_board">Leaderboard</string>

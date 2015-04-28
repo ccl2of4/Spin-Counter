@@ -17,6 +17,7 @@ import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Handler;
+import android.preference.EditTextPreference;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -32,20 +33,30 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import groupn.spin_counter.model.ScoreManager;
+import java.util.Arrays;
+import java.util.List;
+
+import groupn.spin_counter.model.DataRepository;
+import groupn.spin_counter.model.User;
 import groupn.spin_counter.view.SpinnerView;
 
 
 public class MainActivity extends ActionBarActivity implements SpinCounter.SpinListener, SensorEventListener {
-    // constant for identifying the dialog
-    private static final int DIALOG_ALERT = 10;
-    //user name
-    private String mUsername;
-    private static String mUser;
+
+    // constants for identifying the dialog
+    private static final int DIALOG_NO_USERNAME = 0;
+    private static final int DIALOG_NO_USERNAME_NETWORK_ERROR = 1;
+    private static final int DIALOG_NO_USERNAME_USERNAME_TAKEN = 2;
+    private static final int DIALOG_CHANGE_USERNAME = 3;
+    private static final int DIALOG_CHANGE_USERNAME_NETWORK_ERROR = 4;
+    private static final int DIALOG_CHANGE_USERNAME_USERNAME_TAKEN = 5;
+
     //stored data file
     private SharedPreferences mPrefs;
     //tracks if this is the first time the user has run the app
-    private boolean mIsFirstTime;
+
+    private User mUser;
+
     private boolean mHasSpun;
 
     private SpinnerView mSpinnerView;
@@ -58,7 +69,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private SpinCounter mSpinCounter;
     private boolean mInSpinSession;
     private boolean mInCountdown;
-    private ScoreManager mScoreManager;
+    private DataRepository mDataRepository;
 
     private GestureDetector mGestureDetector;
 
@@ -90,8 +101,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         // Model setup
         //
         // =============
-        mScoreManager = ScoreManager.getInstance(ScoreManager.Type.Local);
-        mScoreManager.setContext(getApplicationContext());
+        mDataRepository = DataRepository.getInstance(DataRepository.Type.Global, getApplicationContext ());
 
         mSpinCounter = new SpinCounter(this);
         mInSpinSession = false;
@@ -110,13 +120,8 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mCurrentNumberOfSpins = 0;
 
         mPrefs = getSharedPreferences("sc_prefs", MODE_PRIVATE);
-        mIsFirstTime = mPrefs.getBoolean("mIsFirstTime", true);
         mHasSpun = mPrefs.getBoolean("mHasSpun", false);
-        mUsername = mPrefs.getString("mUsername", "New User");
         mIsMuted = mPrefs.getBoolean("mIsMuted", false);
-        mUser = mUsername;
-
-        mGestureDetector = new GestureDetector(this, new GestureListener());
 
         font = Typeface.createFromAsset(getAssets(), "fonts/orangejuice.otf");
 
@@ -126,6 +131,15 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         //
         // =============
 
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        mGestureDetector = new GestureDetector(this, new GestureListener());
+
+        // fonts
+        ((TextView)findViewById(R.id.ui_separator)).setTypeface(font);
+        ((TextView)findViewById(R.id.highscore)).setTypeface(font);
+        ((TextView)findViewById(R.id.score)).setTypeface(font);
+
+        // score board button
         mScoreBoardButton = (Button)findViewById (R.id.scoreboard_button);
         mScoreBoardButton.setTypeface(font);
         mScoreBoardButton.setOnClickListener (new View.OnClickListener() {
@@ -139,6 +153,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             }
         });
 
+        // bluetooth button
         mNfcButton = (Button)findViewById (R.id.nfc_button);
         mNfcButton.setTypeface(font);
         mNfcButton.setOnClickListener (new View.OnClickListener() {
@@ -165,67 +180,73 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             }
         });
 
+        // mute button
         mMuteButton = (ImageButton)findViewById(R.id.mute_button);
         mMuteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mIsMuted = !mIsMuted;
-                if (mIsMuted) {
-                    mSounds.autoPause();
-                    mMuteButton.setImageResource(R.drawable.mute);
-                } else {
-                    mMuteButton.setImageResource(R.drawable.unmute);
-                }
-
-                SharedPreferences.Editor ed = mPrefs.edit();
-                ed.putBoolean("mIsMuted",mIsMuted);
-                ed.apply();
+                updateMuted(!mIsMuted);
             }
         });
+        updateMuted(mIsMuted);
 
-        if (mIsMuted) {
-            mSounds.autoPause();
-            mMuteButton.setImageResource(R.drawable.mute);
-        } else {
-            mMuteButton.setImageResource(R.drawable.unmute);
-        }
-
+        // spinnerview
         mSpinnerView = makeSpinnerView ();
         mSpinnerView.setCountdownListener(mCountdownListener);
         ((RelativeLayout)findViewById(R.id.main)).addView(mSpinnerView);
 
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        // prompt for username entry
-        if(mIsFirstTime) {
-            Log.d(mUsername, "First time running the app");
-            showDialog(DIALOG_ALERT);
-        }
-        else
-            Log.d("Username = ", mUsername);
+        // score/high score
+        mScore = (TextView)findViewById(R.id.score);
+        mHighscore = (TextView)findViewById(R.id.highscore);
 
+        // screen setup
         if(findViewById(R.id.main).getTag().equals("large_screen")){
             TextView title = (TextView)findViewById (R.id.textView);
             title.setTypeface(font);
         }
         if(findViewById(R.id.main).getTag().equals("tablet_screen")){
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
+            if (getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
+                return;
+            }
         }
 
-        ((TextView)findViewById(R.id.ui_separator)).setTypeface(font);
-        ((TextView)findViewById(R.id.highscore)).setTypeface(font);
-        ((TextView)findViewById(R.id.score)).setTypeface(font);
-        mScore = (TextView)findViewById(R.id.score);
-        mHighscore = (TextView)findViewById(R.id.highscore);
-        if(mHasSpun) {
-            Log.d(TAG,"getting highscore");
-            mHighscore.setText("Your Highscore: " + mScoreManager.getMostSpins(mUsername));
-        }
-        else {
-            Log.d(TAG,"hasn't spun yet");
-            mHighscore.setText("Your Highscore: 0");
-        }
+        // user info
+        mDataRepository.getUserInfo(new DataRepository.Callback<User> () {
+            // user exists in DB
+            @Override
+            public void success(User user) {
+                mUser = user;
+                changedLogin();
+                finishedLaunching();
+            }
 
+            // user doesn't exist in DB. we need to create an entry by asking the user for a
+            // username
+            @Override
+            public void failure(boolean networkError) {
+                if (networkError) {
+                    Log.d (TAG, "network error finding user in DB. exiting.");
+                    System.exit(1);
+                }
+                else {
+                    showDialog(DIALOG_NO_USERNAME);
+                }
+            }
+        });
+
+    }
+
+    private void finishedLaunching() {
+        findSensors();
+    }
+
+    private void changedLogin() {
+        updateHighScore();
+    }
+
+    private void findSensors() {
         SensorManager s = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
         if(s.registerListener(this,
                 s.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR),
@@ -244,6 +265,25 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         }
     }
 
+    private void updateMuted(boolean muted) {
+        mIsMuted = muted;
+        if (mIsMuted) {
+            mSounds.autoPause();
+            mMuteButton.setImageResource(R.drawable.mute);
+        } else {
+            mMuteButton.setImageResource(R.drawable.unmute);
+        }
+        SharedPreferences.Editor ed = mPrefs.edit();
+        ed.putBoolean("mIsMuted", mIsMuted);
+        ed.apply();
+    }
+
+    private void updateHighScore () {
+        if (mUser != null) {
+            mHighscore.setText ("Your High score: " + mUser.maxSpins);
+        }
+    }
+
     private SpinnerView makeSpinnerView () {
         SpinnerView result = new SpinnerView (this);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -256,6 +296,132 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     public void onResume(){
         super.onResume();
         mScore.setVisibility(View.GONE);
+    }
+
+    @Override
+    protected Dialog onCreateDialog(final int id) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_DARK).
+                setCancelable(true);
+        final EditText input = new EditText(this);
+        input.setTextColor(Color.parseColor("#ffffffff"));
+        String usernameHint = (mUser == null) ? "" : mUser.username;
+        input.setHint(usernameHint);
+        input.setHintTextColor(Color.GRAY);
+        builder.setView(input);
+        String acceptButtonTitle = null;
+
+        switch (id) {
+            case DIALOG_NO_USERNAME: {
+                builder.setMessage(R.string.no_username);
+                acceptButtonTitle = getString (R.string.no_username_accept_button);
+                break;
+            }
+            case DIALOG_NO_USERNAME_USERNAME_TAKEN : {
+                builder.setMessage(R.string.no_username_username_taken);
+                acceptButtonTitle = getString (R.string.no_username_accept_button);
+                break;
+            }
+            case DIALOG_NO_USERNAME_NETWORK_ERROR : {
+                builder.setMessage(R.string.no_username_network_error);
+                acceptButtonTitle = getString (R.string.no_username_accept_button);
+                break;
+            }
+            case DIALOG_CHANGE_USERNAME : {
+                builder.setMessage(R.string.change_username);
+                acceptButtonTitle = getString (R.string.change_username_accept_button);
+                builder.setNegativeButton(R.string.username_cancel_button, new CancelOnClickListener());
+                break;
+            }
+            case DIALOG_CHANGE_USERNAME_USERNAME_TAKEN : {
+                builder.setMessage(R.string.change_username_username_taken);
+                acceptButtonTitle = getString (R.string.change_username_accept_button);
+                builder.setNegativeButton(R.string.username_cancel_button, new CancelOnClickListener());
+                break;
+            }
+            case DIALOG_CHANGE_USERNAME_NETWORK_ERROR : {
+                builder.setMessage(R.string.change_username_network_error);
+                acceptButtonTitle = getString (R.string.change_username_accept_button);
+                builder.setNegativeButton(R.string.username_cancel_button, new CancelOnClickListener());
+                break;
+            }
+        }
+
+        final List<Integer> noUsernameCases = Arrays.asList(
+                DIALOG_NO_USERNAME,
+                DIALOG_NO_USERNAME_USERNAME_TAKEN,
+                DIALOG_NO_USERNAME_NETWORK_ERROR);
+
+        final List<Integer> changeUsernameCases = Arrays.asList(
+                 DIALOG_CHANGE_USERNAME,
+                DIALOG_CHANGE_USERNAME_USERNAME_TAKEN,
+                DIALOG_CHANGE_USERNAME_NETWORK_ERROR);
+
+        if (noUsernameCases.contains(id)) {
+            builder.setPositiveButton(acceptButtonTitle, new NoUsernameClickListener(input));
+        } else if (changeUsernameCases.contains(id)) {
+            builder.setPositiveButton(acceptButtonTitle, new ChangeUsernameClickListener(input));
+        }
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        return super.onCreateDialog(id);
+    }
+
+    private class ChangeUsernameClickListener implements DialogInterface.OnClickListener {
+        private EditText mInput;
+        public ChangeUsernameClickListener (EditText input) {
+            mInput = input;
+        }
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            dialog.dismiss();
+            mDataRepository.changeUsername(mInput.getText().toString(), new DataRepository.Callback<User>() {
+                @Override
+                public void success(User result) {
+                    mUser = result;
+                    changedLogin();
+                }
+
+                @Override
+                public void failure(boolean networkError) {
+                    if (networkError) {
+                        showDialog(DIALOG_CHANGE_USERNAME_NETWORK_ERROR);
+                    } else {
+                        showDialog(DIALOG_CHANGE_USERNAME_USERNAME_TAKEN);
+                    }
+                }
+            });
+        }
+    }
+
+    private class NoUsernameClickListener implements DialogInterface.OnClickListener {
+        private EditText mInput;
+        public NoUsernameClickListener (EditText input) {
+            mInput = input;
+        }
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            dialog.dismiss();
+            mDataRepository.registerUsername(mInput.getText().toString(), new DataRepository.Callback<User>() {
+                @Override
+                public void success(User result) {
+                    mUser = result;
+                    finishedLaunching();
+                    changedLogin();
+                }
+
+                @Override
+                public void failure(boolean networkError) {
+                    if (networkError) {
+                        showDialog(DIALOG_NO_USERNAME_NETWORK_ERROR);
+                    } else {
+                        showDialog(DIALOG_NO_USERNAME_USERNAME_TAKEN);
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -328,48 +494,10 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         return super.onOptionsItemSelected(item);*/
         switch (id) {
             case R.id.change_username:
-                showDialog(DIALOG_ALERT);
+                showDialog(DIALOG_CHANGE_USERNAME);
                 return true;
         }
         return false;
-    }
-
-    @Override
-    protected Dialog onCreateDialog(int id) {
-        switch (id) {
-            case DIALOG_ALERT:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_DARK).
-                setMessage("Please enter a username").
-                setCancelable(true);
-                // Set an EditText view to get user input
-                final EditText input = new EditText(this);
-                input.setTextColor(Color.parseColor("#ffffffff"));
-                Log.d("USERNAME HINT", mUsername);
-                input.setHint(mUsername);
-                input.setHintTextColor(Color.GRAY);
-                builder.setView(input);
-                builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        SharedPreferences.Editor ed = mPrefs.edit();
-                        ed.putBoolean("mIsFirstTime",false);
-                        mIsFirstTime = false;
-                        String value = input.getText().toString();
-                        if(value.length() == 0)
-                            value = mPrefs.getString("mUsername", "New User");
-                        mUsername = value;
-                        mUser = mUsername;
-                        ed.putString("mUsername", value);
-                        Log.d("VALUE", value);
-                        ed.apply();
-                        Log.d("SAVING ", mIsFirstTime+" "+mUsername);
-                        return;
-                    }
-                });
-                builder.setNegativeButton("Nope", new CancelOnClickListener());
-                AlertDialog dialog = builder.create();
-                dialog.show();
-        }
-        return super.onCreateDialog(id);
     }
 
     @Override
@@ -406,7 +534,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     @Override
     public void done() {
         mSpinCounter.stop();
-        if(!mHasSpun || mScoreManager.getMostSpins(mUsername) < mCurrentNumberOfSpins) {
+        if(!mHasSpun || mUser.maxSpins < mCurrentNumberOfSpins) {
             Log.d(TAG,"NEW HIGHSCORE: " + mCurrentNumberOfSpins);
             mHighscore.setVisibility(View.VISIBLE);
             mHighscore.setText("Your Highscore: " + mCurrentNumberOfSpins);
@@ -415,7 +543,8 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             mHighscore.setVisibility(View.VISIBLE);
         }
         if (mInSpinSession) {
-            mScoreManager.reportSpins(mUsername,mCurrentNumberOfSpins);
+            Log.d (TAG, "reporting spins");
+            mDataRepository.reportSpins(mCurrentNumberOfSpins);
         }
         if (mInCountdown) {
             mSounds.stop(mPlayingIds[0]);
