@@ -245,7 +245,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         int width = size.x;
         int height = size.y;
         Log.d("SCREEN SIZE", "WIDTH: " + width + " HEIGHT: "+ height);
-        if(width <= 480){
+        if(width <= 520){
             ((TextView) findViewById(R.id.ui_separator)).setText(R.string.dashed_line_short);
             ((TextView) findViewById(R.id.highscore)).setTextSize(35);
         }

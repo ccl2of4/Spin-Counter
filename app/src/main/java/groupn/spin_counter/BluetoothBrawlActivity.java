@@ -36,6 +36,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 import java.util.List;
 
 import groupn.spin_counter.R;
@@ -116,6 +118,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         mPrefs = getSharedPreferences("sc_prefs", MODE_PRIVATE);
         mBluetoothAdapter.setName(mPrefs.getString("mUsername", mSavedBluetoothAdapterName));
         mUsername = mBluetoothAdapter.getName();
+        Log.d("USERNAME", mUsername);
 
         // If the adapter is null, then Bluetooth is not supported
         if (mBluetoothAdapter == null) {
@@ -141,6 +144,8 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         font = Typeface.createFromAsset(getAssets(), "fonts/orangejuice.otf");
         TextView nfcButton = (TextView)findViewById (R.id.textView);
         nfcButton.setTypeface(font);
+        ((TextView)findViewById (R.id.you_score)).setTypeface(font);
+        ((TextView)findViewById (R.id.them_score)).setTypeface(font);
 
         if(findViewById(R.id.bluetooth).getTag().equals("tablet_screen")){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
@@ -153,7 +158,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         int width = size.x;
         int height = size.y;
         Log.d("SCREEN SIZE", "WIDTH: " + width + " HEIGHT: "+ height);
-        if(width <= 480){
+        if(width < 540){
             ((TextView) findViewById(R.id.textView)).setTextSize(40);
         }
     }
@@ -451,7 +456,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
 
     private void interpretMessage(String msg){
         if(msg.startsWith(START_CODE)){
-            Log.d(TAG,"Starting");
+            Log.d(TAG, "Starting");
             mSpinnerView.setEnabled(true);
             Toast.makeText(BluetoothBrawlActivity.this, "YOUR TURN! GO!", Toast.LENGTH_SHORT).show();
         }
@@ -468,6 +473,8 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     }
 
     private void reportResult(){
+        ((TextView)findViewById(R.id.you_score)).setText("You: " + mMyScore);
+        ((TextView)findViewById(R.id.them_score)).setText(mConnectedDeviceName + ": " +mEnemyScore);
         if(mMyScore > mEnemyScore) {
             Toast.makeText(BluetoothBrawlActivity.this, "You WON! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
 
