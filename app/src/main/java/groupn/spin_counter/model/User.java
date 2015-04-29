@@ -2,10 +2,12 @@ package groupn.spin_counter.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Created by connor on 4/27/15.
  */
-public class User {
+public class User implements Serializable {
 
     @SerializedName("user_id")
     public int userId;

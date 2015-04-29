@@ -13,16 +13,14 @@
     <string name="dashed_line_normal">-------------------------</string>
     <string name="dashed_line_short">----------------------</string>
 
-    <!-- username create/change dialogs -->
-    <string name="no_username">Please enter a username in order to use the app</string>
-    <string name="no_username_network_error">There was a network error processing your request. Please try again</string>
-    <string name="no_username_username_taken">The username you have entered is taken. Please try another</string>
-    <string name="change_username">Change your username</string>
-    <string name="change_username_network_error">There was a network error processing your request. Please try again</string>
-    <string name="change_username_username_taken">The username you have entered is taken. Please try another</string>
-    <string name="no_username_accept_button">Set username</string>
-    <string name="change_username_accept_button">Change username</string>
-    <string name="username_cancel_button">Never mind</string>
+     <!-- login activity -->
+    <string name="register_username">Please register a username in order to use the app:</string>
+    <string name="change_username">Change your username:</string>
+    <string name="accept_username">Confirm</string>
+    <string name="username_taken">That username has already been taken. Try another.</string>
+    <string name="network_error">A network error occurred. Please check your internet connection and try again.</string>
+    <string name="ok">Okay</string>
+    <string name="verifying_credentials">Verifying Credentials</string>
 
     <!-- score board -->
     <string name="title_activity_score_board">Leaderboard</string>
@@ -58,5 +56,8 @@
     <!-- SpinnerView -->
     <string name="api_warning_title">API lvl 15 detected</string>
     <string name="api_lvl">This phone has api lvl 15 which does not support setBackground method, thus the spin button will look rough</string>
+    <string name="title_activity_login">LoginActivity</string>
+
+    <string name="hello_world">Hello world!</string>
 
 </resources>
