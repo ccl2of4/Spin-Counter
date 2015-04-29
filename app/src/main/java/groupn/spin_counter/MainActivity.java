@@ -30,6 +30,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import groupn.spin_counter.model.DataRepository;
 import groupn.spin_counter.model.User;
@@ -37,14 +38,6 @@ import groupn.spin_counter.view.SpinnerView;
 
 
 public class MainActivity extends ActionBarActivity implements SpinCounter.SpinListener, SensorEventListener {
-
-    //stored data file
-    private SharedPreferences mPrefs;
-    //tracks if this is the first time the user has run the app
-
-    private User mUser;
-
-    private boolean mHasSpun;
 
     private SpinnerView mSpinnerView;
 
@@ -70,7 +63,6 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private ImageButton mMuteButton;
 
     private SoundPool mSounds;
-    private boolean mIsMuted;
     private int[] mSoundIds;
     private int[] mPlayingIds;
 
@@ -90,15 +82,6 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         //
         // =============
 
-        mUser = (User)getIntent().getSerializableExtra("User");
-        // we're not logged in! do that now
-        if (mUser == null) {
-            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-            finish();
-            startActivity(intent);
-            return;
-        }
-
         mDataRepository = DataRepository.getInstance(DataRepository.Type.Global, getApplicationContext ());
 
         mSpinCounter = new SpinCounter(this);
@@ -116,10 +99,6 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mIsTiming = false;
 
         mCurrentNumberOfSpins = 0;
-
-        mPrefs = getSharedPreferences("sc_prefs", MODE_PRIVATE);
-        mHasSpun = mPrefs.getBoolean("mHasSpun", false);
-        mIsMuted = mPrefs.getBoolean("mIsMuted", false);
 
         font = Typeface.createFromAsset(getAssets(), "fonts/orangejuice.otf");
 
@@ -183,16 +162,16 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mMuteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateMuted(!mIsMuted);
+                boolean muted = getSpinCounterApplication().isMuted();
+                getSpinCounterApplication().setMuted(!muted);
+                updateMuted();
             }
         });
-        updateMuted(mIsMuted);
 
         // spinnerview
         mSpinnerView = makeSpinnerView ();
         mSpinnerView.setCountdownListener(mCountdownListener);
         ((RelativeLayout)findViewById(R.id.main)).addView(mSpinnerView);
-
 
         // score/high score
         mScore = (TextView)findViewById(R.id.score);
@@ -202,12 +181,6 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         if(findViewById(R.id.main).getTag().equals("large_screen")){
             TextView title = (TextView)findViewById (R.id.textView);
             title.setTypeface(font);
-        }
-        if(findViewById(R.id.main).getTag().equals("tablet_screen")){
-            if (getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
-                return;
-            }
         }
 
         // handles text scaling down for smaller screens
@@ -222,13 +195,58 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             ((TextView) findViewById(R.id.highscore)).setTextSize(35);
         }
 
+        // rotate to landscape if necessary
+        if(findViewById(R.id.main).getTag().equals("tablet_screen")){
+            if (getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE) {
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
+                //finish();
+                return;
+            }
+        }
+
         findSensors();
-        changedLogin();
+        updateUI();
     }
 
-    // any code that needs to run after the login state has changed
-    private void changedLogin() {
-        updateHighScore();
+    private SpinCounterApplication getSpinCounterApplication () {
+        return (SpinCounterApplication)getApplication();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (!checkForUserData()) {
+            goToLoginActivity(LoginActivity.PURPOSE_FIND_USER);
+            return;
+        }
+
+        // update the UI with the data that we have, then synchronize our data with
+        // the server (as a sanity check/to ensure data integrity), then update the UI
+        // again. if everything goes nicely, the high score will really only appear to be
+        // updated once
+        updateUI();
+        mDataRepository.getUserInfo(new DataRepository.Callback<User>() {
+            @Override
+            public void success(User user) {
+                getSpinCounterApplication().setUser(user);
+                updateUI();
+            }
+            @Override
+            public void failure(boolean networkError) {
+                Toast.makeText(MainActivity.this, R.string.synchronize_failure, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private boolean checkForUserData () {
+        return getSpinCounterApplication().getUser() != null;
+    }
+
+    private void goToLoginActivity (int purpose) {
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        intent.putExtra(LoginActivity.PURPOSE, purpose);
+        startActivity(intent);
     }
 
     private void findSensors() {
@@ -250,22 +268,25 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         }
     }
 
-    private void updateMuted(boolean muted) {
-        mIsMuted = muted;
-        if (mIsMuted) {
+    private void updateUI () {
+        updateHighScore();
+        updateMuted();
+    }
+
+    private void updateMuted() {
+        if (getSpinCounterApplication().isMuted()) {
             mSounds.autoPause();
             mMuteButton.setImageResource(R.drawable.mute);
         } else {
+            mSounds.autoResume();
             mMuteButton.setImageResource(R.drawable.unmute);
         }
-        SharedPreferences.Editor ed = mPrefs.edit();
-        ed.putBoolean("mIsMuted", mIsMuted);
-        ed.apply();
     }
 
     private void updateHighScore () {
-        if (mUser != null) {
-            mHighScore.setText("Your Highscore: " + mUser.maxSpins);
+        User user = getSpinCounterApplication().getUser();
+        if (user != null) {
+            mHighScore.setText("Your Highscore: " + user.maxSpins);
         }
     }
 
@@ -346,16 +367,9 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        /*if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);*/
         switch (id) {
             case R.id.change_username:
-                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                intent.putExtra("User", mUser);
-                startActivity(intent);
+                goToLoginActivity(LoginActivity.PURPOSE_CHANGE_USERNAME);
                 return true;
         }
         return false;
@@ -383,7 +397,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
                 mTimeChecker.removeCallbacks(mStopSession);
                 mIsTiming = false;
             }
-            if (!mIsMuted) {
+            if (!getSpinCounterApplication().isMuted()) {
                 mPlayingIds[1] = mSounds.play(mSoundIds[1], 1, 1, 1, 0, 1.0f);
             }
             mCurrentNumberOfSpins = newSpins;
@@ -395,7 +409,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     @Override
     public void done() {
         mSpinCounter.stop();
-        if(!mHasSpun || mUser.maxSpins < mCurrentNumberOfSpins) {
+        if(getSpinCounterApplication().getUser().maxSpins < mCurrentNumberOfSpins) {
             Log.d(TAG,"NEW HIGHSCORE: " + mCurrentNumberOfSpins);
             mHighScore.setVisibility(View.VISIBLE);
             mHighScore.setText("Your Highscore: " + mCurrentNumberOfSpins);
@@ -420,19 +434,14 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
 
         mScore.setVisibility(View.VISIBLE);
         mScore.setText("Score: " + mCurrentNumberOfSpins);
-        if(!mHasSpun){
-            SharedPreferences.Editor ed = mPrefs.edit();
-            ed.putBoolean("mHasSpun", true);
-            ed.apply();
-            mHasSpun = true;
-        }
+
         mCurrentNumberOfSpins = 0;
     }
 
     private final SpinnerView.CountdownListener mCountdownListener = new SpinnerView.CountdownListener() {
         @Override
         public void countdownStarted() {
-            if (!mIsMuted) {
+            if (!getSpinCounterApplication().isMuted()) {
                 mPlayingIds[0] = mSounds.play(mSoundIds[0], 1, 1, 1, 0, 1.0f);
             }
             mInCountdown = true;

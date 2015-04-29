@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,17 +27,16 @@ import groupn.spin_counter.model.User;
 
 public class LoginActivity extends ActionBarActivity {
 
+    public static final String PURPOSE = "purpose";
+    public static final int PURPOSE_FIND_USER = 5;
+    public static final int PURPOSE_CHANGE_USERNAME = 6;
+
     private DataRepository mDataRepository;
     private static String TAG = "LoginActivity";
 
     private EditText mEditText;
     private TextView mTextView;
     private Button mButton;
-
-    private User mUser;
-
-    private final static int DIALOG_NETWORK_ERROR = 1;
-    private final static int DIALOG_USERNAME_TAKEN = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,17 +49,17 @@ public class LoginActivity extends ActionBarActivity {
         mButton = (Button)findViewById(R.id.confirm_username);
 
         mDataRepository = DataRepository.getInstance(DataRepository.Type.Global, getApplicationContext());
-        mUser = (User)getIntent().getSerializableExtra("User");
 
-        // User is not null. this means we are here for a username change
-        if (mUser != null) {
+        int purpose = getIntent().getIntExtra(PURPOSE, PURPOSE_FIND_USER);
+        if (purpose == PURPOSE_FIND_USER) {
+            findUser();
+        } else if (purpose == PURPOSE_CHANGE_USERNAME) {
             setUpChangeUsername();
         }
+    }
 
-        // User is null. we don't know if it's in the DB or not
-        else {
-            findUser();
-        }
+    public SpinCounterApplication getSpinCounterApplication() {
+        return (SpinCounterApplication)getApplication();
     }
 
     private void hideUI() {
@@ -75,7 +76,7 @@ public class LoginActivity extends ActionBarActivity {
 
     private void setUpChangeUsername() {
         mTextView.setText(R.string.change_username);
-        mEditText.setHint(mUser.username);
+        mEditText.setHint(getSpinCounterApplication().getUser().username);
         mButton.setOnClickListener(new ChangeUsernameOnClickListener());
     }
 
@@ -88,20 +89,19 @@ public class LoginActivity extends ActionBarActivity {
         hideUI();
         final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.verifying_credentials), null, true);
         mDataRepository.getUserInfo(new DataRepository.Callback<User> () {
-            // user exists in DB
+
+            // user exists in DB. the activity's purpose has been fulfilled, so we can finish
             @Override
             public void success(User user) {
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                intent.putExtra("User", user);
-                startActivity(intent);
+                getSpinCounterApplication().setUser(user);
                 progressDialog.dismiss();
+                finish();
             }
 
             @Override
             public void failure(boolean networkError) {
                 if (networkError) {
-                    // should probably handle this more gracefully
-                    finish();
+                    showDialog(0);
                     progressDialog.dismiss();
                 }
 
@@ -141,20 +141,17 @@ public class LoginActivity extends ActionBarActivity {
     @Override
     protected Dialog onCreateDialog(final int id) {
 
+        // just keep trying to connect until we're successful.
+        // can't use the app without an account
         AlertDialog.Builder builder = new AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_DARK).
                 setCancelable(true).
-                setPositiveButton(R.string.ok, null);
-
-        switch (id) {
-            case DIALOG_USERNAME_TAKEN: {
-                builder.setMessage(R.string.username_taken);
-                break;
-            }
-            case DIALOG_NETWORK_ERROR : {
-                builder.setMessage(R.string.network_error);
-                break;
-            }
-        }
+                setMessage(R.string.network_error).
+                setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        findUser();
+                    }
+                });
 
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -170,9 +167,10 @@ public class LoginActivity extends ActionBarActivity {
         }
         @Override
         public void success(User user) {
+            getSpinCounterApplication().setUser(user);
+
             mProgressDialog.dismiss();
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            intent.putExtra("User", user);
             startActivity(intent);
         }
 
@@ -180,9 +178,9 @@ public class LoginActivity extends ActionBarActivity {
         public void failure(boolean networkError) {
             mProgressDialog.dismiss();
             if (networkError) {
-                showDialog(DIALOG_NETWORK_ERROR);
+                Toast.makeText(LoginActivity.this, R.string.network_error, Toast.LENGTH_LONG).show();
             } else {
-                showDialog(DIALOG_USERNAME_TAKEN);
+                Toast.makeText(LoginActivity.this, R.string.username_taken, Toast.LENGTH_LONG).show();
             }
         }
     }

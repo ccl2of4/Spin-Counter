@@ -1,5 +1,6 @@
 package groupn.spin_counter.model;
 
+import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -26,4 +27,15 @@ public class User implements Serializable {
 
     @SerializedName("games_lost")
     public int gamesLost;
+
+
+    // used for storing in shared preferences
+    public String serialize() {
+        Gson gson = new Gson();
+        return gson.toJson(this);
+    }
+    public static User deserialize(String serializedData) {
+        Gson gson = new Gson();
+        return gson.fromJson(serializedData, User.class);
+    }
 }

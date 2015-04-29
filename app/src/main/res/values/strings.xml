@@ -12,6 +12,7 @@
     <string name="dashed_line_long">-----------------------------------</string>
     <string name="dashed_line_normal">-------------------------</string>
     <string name="dashed_line_short">----------------------</string>
+    <string name="synchronize_failure">Error synchronizing data with server. Check your network connection.</string>
 
      <!-- login activity -->
     <string name="register_username">Please register a username in order to use the app:</string>

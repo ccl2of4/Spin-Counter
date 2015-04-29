@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <application
+    <application android:name="SpinCounterApplication"
         android:allowBackup="true"
         android:icon="@drawable/launchicon"
         android:label="@string/app_name"
