@@ -569,6 +569,10 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         }
     }
 
+    private SpinCounterApplication getSpinCounterApplication () {
+        return (SpinCounterApplication)getApplication();
+    }
+
     @Override
     protected Dialog onCreateDialog(int id) {
         switch (id) {
