@@ -45,6 +45,7 @@ import groupn.spin_counter.bluetooth.BluetoothService;
 import groupn.spin_counter.bluetooth.Constants;
 import groupn.spin_counter.bluetooth.DeviceListActivity;
 import groupn.spin_counter.model.DataRepository;
+import groupn.spin_counter.model.User;
 import groupn.spin_counter.view.SpinnerView;
 
 public class BluetoothBrawlActivity extends ActionBarActivity {
@@ -85,6 +86,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     //start of message codes
     private static String START_CODE = "1:";
     private static String DONE_CODE = "2:";
+    private static String USER_CODE = "3:";
 
     //score result variables
     private int mEnemyScore = -1;
@@ -99,6 +101,8 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
 
     // constant for identifying the dialog
     private static final int DIALOG_ALERT = 11;
+
+    private User mEnemy;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,7 +120,8 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mSavedBluetoothAdapterName = mBluetoothAdapter.getName();
         mPrefs = getSharedPreferences("sc_prefs", MODE_PRIVATE);
-        mBluetoothAdapter.setName(mPrefs.getString("mUsername", mSavedBluetoothAdapterName));
+        Log.d(TAG, getSpinCounterApplication().getUser().username);
+        mBluetoothAdapter.setName(getSpinCounterApplication().getUser().username);
         mUsername = mBluetoothAdapter.getName();
         Log.d("USERNAME", mUsername);
 
@@ -403,8 +408,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
                                 Log.d(TAG, "isClient");
                                 mSpinnerView.setEnabled(true);
                             }
-
-                            // TODO: do something else here probably, idk
+                            sendUser();
                             break;
                         case BluetoothService.STATE_CONNECTING:
                             setStatus(R.string.title_connecting);
@@ -421,8 +425,6 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
                     byte[] writeBuf = (byte[]) msg.obj;
                     // construct a string from the buffer
                     String writeMessage = new String(writeBuf);
-
-                    // TODO: do something with that information
                     break;
 
                 // opponent just made a move
@@ -431,7 +433,6 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
                     // construct a string from the valid bytes in the buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
                     interpretMessage(readMessage);
-                    // TODO: do something with that information
                     break;
                 case Constants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name
@@ -454,6 +455,9 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         }
     };
 
+    private void sendUser(){
+        sendMessage(USER_CODE + getSpinCounterApplication().getUser().serialize());
+    }
     private void interpretMessage(String msg){
         if(msg.startsWith(START_CODE)){
             Log.d(TAG, "Starting");
@@ -470,6 +474,11 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
             }
             reportResult();
         }
+        else if(msg.startsWith(USER_CODE)){
+            Log.d(TAG,"Enemy User");
+            mEnemy = User.deserialize(msg.substring(2));
+            Log.d(TAG, mEnemy.username + " " + mEnemy.macAddress);
+        }
     }
 
     private void reportResult(){
@@ -477,19 +486,16 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         ((TextView)findViewById(R.id.them_score)).setText(mConnectedDeviceName + ": " +mEnemyScore);
         if(mMyScore > mEnemyScore) {
             Toast.makeText(BluetoothBrawlActivity.this, "You WON! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
-
-            // ADD IN REPORT GAME HERE
-
+            mDataRepository.reportSpins(mMyScore);
+            mDataRepository.reportGame(mEnemy,true);
         }else if(mMyScore < mEnemyScore) {
             Toast.makeText(BluetoothBrawlActivity.this, "You LOST! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
-
-            // ADD IN REPORT GAME HERE
-
+            mDataRepository.reportSpins(mMyScore);
+            mDataRepository.reportGame(mEnemy,false);
         }else {
             Toast.makeText(BluetoothBrawlActivity.this, "TIE! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
-
-            // ADD IN REPORT GAME HERE
-
+            mDataRepository.reportSpins(mMyScore);
+            mDataRepository.reportGame(mEnemy,false);
         }
         mEnemyScore = -1;
         mMyScore = -1;
