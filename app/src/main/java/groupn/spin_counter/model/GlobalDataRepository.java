@@ -102,7 +102,7 @@ class GlobalDataRepository extends DataRepository {
                 getService().postGame(thisUser.userId, opponent.userId, new retrofit.Callback<Response>() {
                     @Override
                     public void success(Response response, Response response2) {
-
+                        Log.d (TAG, "report success bluetooth");
                     }
 
                     @Override
