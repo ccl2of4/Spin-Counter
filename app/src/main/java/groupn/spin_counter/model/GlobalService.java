@@ -28,7 +28,7 @@ interface GlobalService {
 
     @POST("/game.php")
     @FormUrlEncoded
-    public void postGame (@Field("winner_user_id") int winnerUserId, @Field("loser_user_id") int loserUserId, Callback<Response> callback);
+    public void postGame (@Field("player1_user_id") int player1UserId, @Field("player2_user_id") int player2UserId, @Field("player1_score") int player1Score, @Field("player2_score") int player2Score, Callback<Response> callback);
 
     @POST("/spin.php")
     @FormUrlEncoded

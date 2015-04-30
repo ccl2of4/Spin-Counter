@@ -73,9 +73,10 @@ public class ScoreBoardActivity extends ActionBarActivity {
                     List<String> attributes = new LinkedList<String> ();
                     attributes.add ( user.username );
                     attributes.add ( Integer.toString(user.maxSpins) );
-                    attributes.add ( Integer.toString(user.gamesLost + user.gamesWon) );
+                    attributes.add ( Integer.toString(user.getGamesPlayed()) );
                     attributes.add ( Integer.toString(user.gamesWon) );
                     attributes.add ( Integer.toString(user.gamesLost) );
+                    attributes.add ( Integer.toString(user.gamesTied) );
 
                     for (String attribute : attributes) {
                         TextView textView = new TextView (ScoreBoardActivity.this);

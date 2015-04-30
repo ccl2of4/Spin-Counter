@@ -234,7 +234,14 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             }
             @Override
             public void failure(boolean networkError) {
-                Toast.makeText(MainActivity.this, R.string.synchronize_failure, Toast.LENGTH_SHORT).show();
+                if (networkError) {
+                    Toast.makeText(MainActivity.this, R.string.synchronize_failure, Toast.LENGTH_SHORT).show();
+                }
+
+                // this code will run if the server can't find your account (e.g. it was deleted)
+                else {
+                    goToLoginActivity(LoginActivity.PURPOSE_FIND_USER);
+                }
             }
         });
     }
@@ -410,16 +417,18 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     public void done() {
         mSpinCounter.stop();
         if(getSpinCounterApplication().getUser().maxSpins < mCurrentNumberOfSpins) {
-            Log.d(TAG,"NEW HIGHSCORE: " + mCurrentNumberOfSpins);
-            mHighScore.setVisibility(View.VISIBLE);
             mHighScore.setText("Your Highscore: " + mCurrentNumberOfSpins);
         }
-        else{
-            mHighScore.setVisibility(View.VISIBLE);
-        }
+        mHighScore.setVisibility(View.VISIBLE);
         if (mInSpinSession) {
-            Log.d (TAG, "reporting spins");
-            mDataRepository.reportSpins(mCurrentNumberOfSpins);
+            mDataRepository.reportSpins(mCurrentNumberOfSpins, new DataRepository.Callback<Void>() {
+                @Override
+                public void success(Void result) {}
+                @Override
+                public void failure(boolean networkError) {
+                    Toast.makeText(MainActivity.this, R.string.synchronize_failure, Toast.LENGTH_SHORT).show();
+                }
+            });
         }
         if (mInCountdown) {
             mSounds.stop(mPlayingIds[0]);

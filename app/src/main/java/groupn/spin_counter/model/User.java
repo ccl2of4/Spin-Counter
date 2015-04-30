@@ -28,6 +28,12 @@ public class User implements Serializable {
     @SerializedName("games_lost")
     public int gamesLost;
 
+    @SerializedName("games_tied")
+    public int gamesTied;
+
+    public int getGamesPlayed () {
+        return gamesWon + gamesLost + gamesTied;
+    }
 
     // used for storing in shared preferences
     public String serialize() {

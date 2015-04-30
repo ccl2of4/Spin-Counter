@@ -13,9 +13,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:stretchColumns="*">
-
         <TableRow>
-
             <TextView android:text="@string/score_board_name" />
 
             <TextView android:text="@string/score_board_most_spins" />
@@ -26,8 +24,8 @@
 
             <TextView android:text="@string/score_board_games_lost" />
 
+            <TextView android:text="@string/score_board_games_tied" />
         </TableRow>
-
     </TableLayout>
 
 </RelativeLayout>

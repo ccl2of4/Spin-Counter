@@ -484,19 +484,24 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     private void reportResult(){
         ((TextView)findViewById(R.id.you_score)).setText("You: " + mMyScore);
         ((TextView)findViewById(R.id.them_score)).setText(mConnectedDeviceName + ": " +mEnemyScore);
+
         if(mMyScore > mEnemyScore) {
             Toast.makeText(BluetoothBrawlActivity.this, "You WON! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
-            mDataRepository.reportSpins(mMyScore);
-            mDataRepository.reportGame(mEnemy,true);
         }else if(mMyScore < mEnemyScore) {
             Toast.makeText(BluetoothBrawlActivity.this, "You LOST! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
-            mDataRepository.reportSpins(mMyScore);
-            mDataRepository.reportGame(mEnemy,false);
         }else {
             Toast.makeText(BluetoothBrawlActivity.this, "TIE! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
-            mDataRepository.reportSpins(mMyScore);
-            mDataRepository.reportGame(mEnemy,false);
         }
+
+        mDataRepository.reportGame(getSpinCounterApplication().getUser(), mEnemy, mMyScore, mEnemyScore, new DataRepository.Callback<Void>() {
+            @Override
+            public void success(Void result) {}
+            @Override
+            public void failure(boolean networkError) {
+                Toast.makeText(BluetoothBrawlActivity.this, R.string.synchronize_failure, Toast.LENGTH_SHORT).show();
+            }
+        });
+
         mEnemyScore = -1;
         mMyScore = -1;
     }

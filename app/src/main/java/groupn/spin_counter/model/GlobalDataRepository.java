@@ -80,41 +80,31 @@ class GlobalDataRepository extends DataRepository {
     }
 
     @Override
-    public void reportSpins(int spins) {
+    public void reportSpins(int spins, final Callback<Void> callback) {
         mService.postSpin(getMacAddress(), spins, new retrofit.Callback<Response>() {
             @Override
             public void success(Response response, Response response2) {
-                Log.d (TAG, "report success");
+                callback.success(null);
             }
 
             @Override
             public void failure(RetrofitError error) {
-                Log.d (TAG, "report fail");
+                callback.failure(error.getKind().equals(RetrofitError.Kind.NETWORK));
             }
         });
     }
 
     @Override
-    public void reportGame(final User opponent, boolean won) {
-        getUserInfo(new Callback<User>() {
+    public void reportGame(User player1, User player2, int player1Spins, int player2Spins, final Callback<Void> callback) {
+        getService().postGame(player1.userId, player2.userId, player1Spins, player2Spins, new retrofit.Callback<Response>() {
             @Override
-            public void success(User thisUser) {
-                getService().postGame(thisUser.userId, opponent.userId, new retrofit.Callback<Response>() {
-                    @Override
-                    public void success(Response response, Response response2) {
-                        Log.d (TAG, "report success bluetooth");
-                    }
-
-                    @Override
-                    public void failure(RetrofitError error) {
-
-                    }
-                });
+            public void success(Response response, Response response2) {
+                callback.success(null);
             }
 
             @Override
-            public void failure(boolean networkError) {
-                // maybe this should be reported
+            public void failure(RetrofitError error) {
+                callback.failure(error.getKind().equals(RetrofitError.Kind.NETWORK));
             }
         });
     }

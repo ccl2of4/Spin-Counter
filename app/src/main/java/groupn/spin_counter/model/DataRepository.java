@@ -65,7 +65,7 @@ public abstract class DataRepository {
      *
      * @param username the username wanted
      * @param callback success if the username was registered, failure otherwise (e.g. username is
-     *                 already taken)
+     *                 already taken). callback carries new user data.
      */
     public abstract void registerUsername (String username, Callback<User> callback);
 
@@ -94,15 +94,26 @@ public abstract class DataRepository {
     /**
      *
      * @param spins the number of spins user achieved
+     * @param callback completion handler
      */
-    public abstract void reportSpins (int spins);
+    public abstract void reportSpins (int spins, Callback<Void> callback);
 
     /**
      *
-     * @param opponent
-     * @param won true if the user calling the method won the game, false otherwise
+     * Report a game. This will automatically report spins for both users as
+     * well (using the data provided,)
+     *
+     * @param player1 either player (client or server)
+     * @param player2 the other player
+     * @param player1Spins number of spins for player1
+     * @param player2Spins number of spins for player2
+     * @param callback completion handler
      */
-    public abstract void reportGame (User opponent, boolean won);
+    public abstract void reportGame (User player1,
+                                     User player2,
+                                     int player1Spins,
+                                     int player2Spins,
+                                     Callback<Void> callback);
 
 
     /**

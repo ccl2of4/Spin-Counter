@@ -30,6 +30,7 @@
     <string name="score_board_games_played">Played</string>
     <string name="score_board_games_won">Won</string>
     <string name="score_board_games_lost">Lost</string>
+    <string name="score_board_games_tied">Tied</string>
     <string name="title_activity_nfcbrawl">Bluetooth Brawl</string>
 
     <!--  BluetoothChat -->

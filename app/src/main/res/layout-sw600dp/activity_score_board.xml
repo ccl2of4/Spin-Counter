@@ -26,6 +26,8 @@
 
             <TextView android:text="@string/score_board_games_lost" />
 
+            <TextView android:text="@string/score_board_games_tied" />
+
         </TableRow>
 
     </TableLayout>
