@@ -183,8 +183,10 @@ public class LoginActivity extends ActionBarActivity {
     private class ChangeUsernameOnClickListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-            final ProgressDialog progressDialog = ProgressDialog.show(LoginActivity.this, getString(R.string.verifying_credentials), null, true);
-            mDataRepository.changeUsername(mEditText.getText().toString(), new UsernameResultHandler(progressDialog));
+            if(mEditText.getText().length() != 0) {
+                final ProgressDialog progressDialog = ProgressDialog.show(LoginActivity.this, getString(R.string.verifying_credentials), null, true);
+                mDataRepository.changeUsername(mEditText.getText().toString(), new UsernameResultHandler(progressDialog));
+            }
         }
     }
 
