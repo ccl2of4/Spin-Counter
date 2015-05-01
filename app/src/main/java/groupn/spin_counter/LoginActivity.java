@@ -165,7 +165,7 @@ public class LoginActivity extends ActionBarActivity {
             getSpinCounterApplication().setUser(user);
 
             mProgressDialog.dismiss();
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(intent);
         }
 
