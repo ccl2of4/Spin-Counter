@@ -16,11 +16,14 @@ import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Handler;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -28,6 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -108,7 +112,10 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         //
         // =============
 
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        // display username as actionbar title
+        getSupportActionBar().setTitle("");
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+
         mGestureDetector = new GestureDetector(this, new GestureListener());
 
         // fonts
@@ -278,6 +285,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private void updateUI () {
         updateHighScore();
         updateMuted();
+        updateUsername();
     }
 
     private void updateMuted() {
@@ -295,6 +303,17 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         if (user != null) {
             mHighScore.setText("Your Highscore: " + user.maxSpins);
         }
+    }
+
+    private void updateUsername(){
+        View view = LayoutInflater.from(this).inflate(R.layout.abs_layout, null);
+        if(getSpinCounterApplication().getUser() != null)
+            ((TextView)view.findViewById(R.id.mytext)).setText(getSpinCounterApplication().getUser().username);
+        ((TextView)view.findViewById(R.id.mytext)).setTypeface(font);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        view.setLayoutParams(params);
+        getSupportActionBar().setCustomView(view);
     }
 
     private SpinnerView makeSpinnerView () {
