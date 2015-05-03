@@ -492,15 +492,18 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         }else {
             Toast.makeText(BluetoothBrawlActivity.this, "TIE! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
         }
+        if(isServer) {
+            mDataRepository.reportGame(getSpinCounterApplication().getUser(), mEnemy, mMyScore, mEnemyScore, new DataRepository.Callback<Void>() {
+                @Override
+                public void success(Void result) {
+                }
 
-        mDataRepository.reportGame(getSpinCounterApplication().getUser(), mEnemy, mMyScore, mEnemyScore, new DataRepository.Callback<Void>() {
-            @Override
-            public void success(Void result) {}
-            @Override
-            public void failure(boolean networkError) {
-                Toast.makeText(BluetoothBrawlActivity.this, R.string.synchronize_failure, Toast.LENGTH_SHORT).show();
-            }
-        });
+                @Override
+                public void failure(boolean networkError) {
+                    Toast.makeText(BluetoothBrawlActivity.this, R.string.synchronize_failure, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
         mEnemyScore = -1;
         mMyScore = -1;
