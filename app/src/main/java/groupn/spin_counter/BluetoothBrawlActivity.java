@@ -13,6 +13,7 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Handler;
@@ -483,15 +484,21 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     }
 
     private void reportResult(){
-        ((TextView)findViewById(R.id.you_score)).setText("You: " + mMyScore);
-        ((TextView)findViewById(R.id.them_score)).setText(mConnectedDeviceName + ": " +mEnemyScore);
+        ((TextView)findViewById(R.id.you_score)).setText(" You: " + mMyScore + " ");
+        ((TextView)findViewById(R.id.them_score)).setText(" " + mConnectedDeviceName + ": " +mEnemyScore + " ");
 
         if(mMyScore > mEnemyScore) {
             Toast.makeText(BluetoothBrawlActivity.this, "You WON! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
+            ((TextView)findViewById(R.id.you_score)).setBackgroundResource(R.drawable.win);
+            ((TextView)findViewById(R.id.them_score)).setBackgroundResource(R.drawable.lose);
         }else if(mMyScore < mEnemyScore) {
             Toast.makeText(BluetoothBrawlActivity.this, "You LOST! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
+            ((TextView)findViewById(R.id.you_score)).setBackgroundResource(R.drawable.lose);
+            ((TextView)findViewById(R.id.them_score)).setBackgroundResource(R.drawable.win);
         }else {
             Toast.makeText(BluetoothBrawlActivity.this, "TIE! " + mMyScore + " to " + mEnemyScore, Toast.LENGTH_SHORT).show();
+            ((TextView)findViewById(R.id.you_score)).setBackgroundResource(R.drawable.tie);
+            ((TextView)findViewById(R.id.them_score)).setBackgroundResource(R.drawable.tie);
         }
         if(isServer) {
             mDataRepository.reportGame(getSpinCounterApplication().getUser(), mEnemy, mMyScore, mEnemyScore, new DataRepository.Callback<Void>() {
