@@ -37,6 +37,7 @@ import android.widget.TextView;
 import java.util.Set;
 
 import groupn.spin_counter.R;
+import groupn.spin_counter.SpinCounterApplication;
 
 /**
  * This Activity appears as a dialog. It lists any paired devices and
@@ -188,6 +189,9 @@ public class DeviceListActivity extends Activity {
 
             // Set result and finish this Activity
             setResult(Activity.RESULT_OK, intent);
+            Log.d("HERE", "CONNECTING");
+            SharedPreferences mPrefs = getSharedPreferences("sc_prefs", MODE_PRIVATE);
+            getSpinCounterApplication().setmServer(false);
             finish();
         }
     };
@@ -220,5 +224,9 @@ public class DeviceListActivity extends Activity {
             }
         }
     };
+
+    private SpinCounterApplication getSpinCounterApplication () {
+        return (SpinCounterApplication)getApplication();
+    }
 
 }

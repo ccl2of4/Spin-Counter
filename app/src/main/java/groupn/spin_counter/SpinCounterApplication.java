@@ -29,6 +29,15 @@ public class SpinCounterApplication extends Application {
         savePreferences();
     }
 
+    /* server global state */
+    public boolean ismServer () {
+        return mServer;
+    }
+    public void setmServer (boolean server) {
+        mServer = server;
+        savePreferences();
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -50,6 +59,7 @@ public class SpinCounterApplication extends Application {
 
         e.putBoolean(MUTED_KEY, mMuted);
         e.putString(USER_KEY, mUser.serialize());
+        e.putBoolean(SERVER_KEY, mServer);
 
         e.apply();
     }
@@ -59,9 +69,11 @@ public class SpinCounterApplication extends Application {
     private static final String USER_KEY = "user";
     private static final String PREFERENCES_NAME = "sc_prefs";
     private static final String TAG = "SpinCounterApplication";
+    private static final String SERVER_KEY = "server";
 
     // i-vars
     private User mUser;
     private boolean mMuted;
     private SharedPreferences mPrefs;
+    private boolean mServer;
 }

@@ -109,9 +109,8 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nfcbrawl);
 
-        if (!deviceHasGyroscope ()) {
-            // does this matter?
-        }
+        // hide activity name on actionbar
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         //instantiate score manager
         mDataRepository = DataRepository.getInstance(DataRepository.Type.Global, getApplicationContext());
@@ -142,6 +141,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         mSpinCounter = new SpinCounter (this);
         mSpinCounter.registerListener (mSpinListener);
         isServer=true;
+        getSpinCounterApplication().setmServer(true);
         Log.d(TAG,"isServer");
 
         mGestureDetector = new GestureDetector(this, new GestureListener());
@@ -218,8 +218,8 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.secure_connect_scan: {
-                isServer = false;
-                Log.d(TAG,"isClient");
+                //isServer = false;
+                //Log.d(TAG,"isClient");
                 // Launch the DeviceListActivity to see devices and do scan
                 Intent serverIntent = new Intent(this, DeviceListActivity.class);
                 startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
@@ -404,6 +404,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
                     switch (msg.arg1) {
                         case BluetoothService.STATE_CONNECTED:
                             setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
+                            isServer = getSpinCounterApplication().ismServer();
                             if(!isServer) {
                                 Log.d(TAG, "isClient");
                                 mSpinnerView.setEnabled(true);
