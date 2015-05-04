@@ -19,8 +19,14 @@ interface GlobalService {
     @GET("/user.php")
     public void getUser (@Query("mac_address") String macAddress, Callback<User> callback);
 
+    @GET("/searchusers.php")
+    public void searchUsers (@Query("query") String query, Callback<List<User>> callback);
+
     @GET("/leaderboard.php")
     public void getLeaderboard (Callback<List<User>> callback);
+
+    @GET("/followedusers.php")
+    public void getFollowedUsers (@Query ("user_id") int userId, Callback<List<User>> callback);
 
     @POST("/signup.php")
     @FormUrlEncoded
@@ -37,4 +43,8 @@ interface GlobalService {
     @POST("/username.php")
     @FormUrlEncoded
     public void postChangeUsername (@Field("mac_address") String macAddress, @Field("username") String username, Callback<User> callback);
+
+    @POST("/follow.php")
+    @FormUrlEncoded
+    public void postFollow (@Field("following_user_id") int followingUserId, @Field("followed_user_id") int followedUserId, Callback<Response> callback);
 }

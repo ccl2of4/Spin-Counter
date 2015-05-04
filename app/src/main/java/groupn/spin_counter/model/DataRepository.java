@@ -47,11 +47,11 @@ public abstract class DataRepository {
         return dataRepository;
     }
 
-    // ============
+    // ======================
     //
     // User Info
     //
-    // ============
+    // ======================
 
     /**
      *
@@ -77,19 +77,63 @@ public abstract class DataRepository {
      */
     public abstract void changeUsername (String username, Callback<User> callback);
 
-    // ============
+    /**
+     *
+     * Search for users matching the query.
+     * Example:
+     * given these users exist:
+     *  joe, john, johnny
+     *
+     * the query "jo" will yield [joe, john, johnny]
+     * the query "joe" will yield [joe]
+     * the query "john" will yeild [john, johnny]
+     * the query "johhny" will yield [johhny]
+     * the query "joo" will yield []
+     *
+     * @param query the query used to search.
+     * @param callback
+     */
+    public abstract void searchUsers (String query, Callback<List<User>> callback);
+
+    // ======================
     //
-    // Retrieve (GET)
+    // Following users
     //
-    // ============
+    // ======================
+
+    /**
+     *
+     * Adds the following user as a follower of the followed user
+     *
+     * @param followingUser the user doing the following
+     * @param followedUser the user being followed
+     * @param callback
+     */
+    public abstract void followUser (User followingUser, User followedUser, Callback<Void> callback);
+
+    /**
+     *
+     * Get a list of users the given user is following
+     * Order is currently random
+     *
+     * @param user the user whose followed users we want
+     * @param callback
+     */
+    public abstract void getFollowedUsers (User user, Callback<List<User>> callback);
+
+    // ======================
+    //
+    // Leaderboard
+    //
+    // ======================
 
     public abstract void getLeaderboard (Callback<List<User>> callback);
 
-    // ============
+    // ======================
     //
-    // Store (POST)
+    // Reporting spins/games
     //
-    // ============
+    // ======================
 
     /**
      *

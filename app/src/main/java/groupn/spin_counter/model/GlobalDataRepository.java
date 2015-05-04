@@ -65,6 +65,51 @@ class GlobalDataRepository extends DataRepository {
     }
 
     @Override
+    public void searchUsers(String query, final Callback<List<User>> callback) {
+        getService().searchUsers(query, new retrofit.Callback<List<User>>() {
+            @Override
+            public void success(List<User> users, Response response) {
+                callback.success(users);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                callback.failure(error.getKind().equals(RetrofitError.Kind.NETWORK));
+            }
+        });
+    }
+
+    @Override
+    public void followUser(User followingUser, User followedUser, final Callback<Void> callback) {
+        getService().postFollow(followingUser.userId, followedUser.userId, new retrofit.Callback<Response>() {
+            @Override
+            public void success(Response response, Response response2) {
+                callback.success(null);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                callback.failure(error.getKind().equals(RetrofitError.Kind.NETWORK));
+            }
+        });
+    }
+
+    @Override
+    public void getFollowedUsers(User user, final Callback<List<User>> callback) {
+        getService().getFollowedUsers(user.userId, new retrofit.Callback<List<User>>() {
+            @Override
+            public void success(List<User> users, Response response) {
+                callback.success(users);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                callback.failure(error.getKind().equals(RetrofitError.Kind.NETWORK));
+            }
+        });
+    }
+
+    @Override
     public void getLeaderboard(final Callback<List<User>> callback) {
         getService().getLeaderboard(new retrofit.Callback<List<User>>() {
             @Override
@@ -81,7 +126,7 @@ class GlobalDataRepository extends DataRepository {
 
     @Override
     public void reportSpins(int spins, final Callback<Void> callback) {
-        mService.postSpin(getMacAddress(), spins, new retrofit.Callback<Response>() {
+        getService().postSpin(getMacAddress(), spins, new retrofit.Callback<Response>() {
             @Override
             public void success(Response response, Response response2) {
                 callback.success(null);
