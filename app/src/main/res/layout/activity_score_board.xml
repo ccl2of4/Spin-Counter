@@ -8,24 +8,29 @@
     tools:context="groupn.spin_counter.ScoreBoardActivity"
     android:background="@android:color/holo_blue_dark"
     android:tag="small_screen">
-
-    <TableLayout android:id="@+id/table_layout"
+    <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:stretchColumns="*">
-        <TableRow>
-            <TextView android:text="@string/score_board_name" />
+        android:scrollbars="none"
+        android:layout_weight="1">
+        <TableLayout android:id="@+id/table_layout"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:stretchColumns="*">
+            <TableRow>
+                <TextView android:text="@string/score_board_name" />
 
-            <TextView android:text="@string/score_board_most_spins" />
+                <TextView android:text="@string/score_board_most_spins" />
 
-            <TextView android:text="@string/score_board_games_played" />
+                <TextView android:text="@string/score_board_games_played" />
 
-            <TextView android:text="@string/score_board_games_won" />
+                <TextView android:text="@string/score_board_games_won" />
 
-            <TextView android:text="@string/score_board_games_lost" />
+                <TextView android:text="@string/score_board_games_lost" />
 
-            <TextView android:text="@string/score_board_games_tied" />
-        </TableRow>
-    </TableLayout>
+                <TextView android:text="@string/score_board_games_tied" />
+            </TableRow>
+        </TableLayout>
+    </ScrollView>
 
 </RelativeLayout>

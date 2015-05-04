@@ -308,7 +308,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private void updateUsername(){
         View view = LayoutInflater.from(this).inflate(R.layout.abs_layout, null);
         if(getSpinCounterApplication().getUser() != null)
-            ((TextView)view.findViewById(R.id.mytext)).setText(getSpinCounterApplication().getUser().username);
+            ((TextView)view.findViewById(R.id.mytext)).setText("  " + getSpinCounterApplication().getUser().username + " ");
         ((TextView)view.findViewById(R.id.mytext)).setTypeface(font);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
