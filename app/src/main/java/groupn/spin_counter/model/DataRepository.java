@@ -113,6 +113,16 @@ public abstract class DataRepository {
 
     /**
      *
+     * removes the following user as a follower of the followed user
+     *
+     * @param followingUser the user doing the following
+     * @param followedUser the user being followed
+     * @param callback
+     */
+    public abstract void unfollowUser (User followingUser, User followedUser, Callback<Void> callback);
+
+    /**
+     *
      * Get a list of users the given user is following
      * Order is currently random
      *

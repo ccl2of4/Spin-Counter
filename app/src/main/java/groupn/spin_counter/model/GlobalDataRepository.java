@@ -95,6 +95,21 @@ class GlobalDataRepository extends DataRepository {
     }
 
     @Override
+    public void unfollowUser(User followingUser, User followedUser, final Callback<Void> callback) {
+        getService().postUnfollow(followingUser.userId, followedUser.userId, new retrofit.Callback<Response>() {
+            @Override
+            public void success(Response response, Response response2) {
+                callback.success(null);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                callback.failure(error.getKind().equals(RetrofitError.Kind.NETWORK));
+            }
+        });
+    }
+
+    @Override
     public void getFollowedUsers(User user, final Callback<List<User>> callback) {
         getService().getFollowedUsers(user.userId, new retrofit.Callback<List<User>>() {
             @Override

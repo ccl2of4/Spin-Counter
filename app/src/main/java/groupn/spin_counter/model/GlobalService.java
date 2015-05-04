@@ -47,4 +47,8 @@ interface GlobalService {
     @POST("/follow.php")
     @FormUrlEncoded
     public void postFollow (@Field("following_user_id") int followingUserId, @Field("followed_user_id") int followedUserId, Callback<Response> callback);
+
+    @POST("/unfollow.php")
+    @FormUrlEncoded
+    public void postUnfollow (@Field("following_user_id") int followingUserId, @Field("followed_user_id") int followedUserId, Callback<Response> callback);
 }
