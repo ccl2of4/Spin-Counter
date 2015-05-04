@@ -461,6 +461,13 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mSpinnerView.setRotation(0);
 
         mScore.setVisibility(View.VISIBLE);
+        Log.d(TAG,"SETTING SCORE " + mCurrentNumberOfSpins);
+        if (mIsTiming) {
+            Log.d(TAG,"CANCEL TIMER");
+            mTimeChecker.removeCallbacks(mStopSession);
+            mIsTiming = false;
+        }
+
         mScore.setText("Score: " + mCurrentNumberOfSpins);
 
         mCurrentNumberOfSpins = 0;
