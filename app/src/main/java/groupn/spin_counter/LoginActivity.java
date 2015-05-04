@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,6 +18,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +40,7 @@ public class LoginActivity extends ActionBarActivity {
     private EditText mEditText;
     private TextView mTextView;
     private Button mButton;
+    private Typeface font;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +53,7 @@ public class LoginActivity extends ActionBarActivity {
         mButton = (Button)findViewById(R.id.confirm_username);
 
         mDataRepository = DataRepository.getInstance(DataRepository.Type.Global, getApplicationContext());
+        font = Typeface.createFromAsset(getAssets(), "fonts/orangejuice.otf");
 
         int purpose = getIntent().getIntExtra(PURPOSE, PURPOSE_FIND_USER);
         if (purpose == PURPOSE_FIND_USER) {
@@ -56,6 +61,8 @@ public class LoginActivity extends ActionBarActivity {
         } else if (purpose == PURPOSE_CHANGE_USERNAME) {
             setUpChangeUsername();
         }
+        ((TextView)findViewById(R.id.confirm_username)).setTypeface(font);
+        ((TextView)findViewById(R.id.confirm_username)).setTextColor(Color.parseColor("#ff000000"));
     }
 
     public SpinCounterApplication getSpinCounterApplication() {
@@ -76,12 +83,18 @@ public class LoginActivity extends ActionBarActivity {
 
     private void setUpChangeUsername() {
         mTextView.setText(R.string.change_username);
+        mTextView.setTypeface(font);
+        mTextView.setTextColor(Color.parseColor("#ff000000"));
+        mTextView.setTextSize(40);
         mEditText.setHint(getSpinCounterApplication().getUser().username);
         mButton.setOnClickListener(new ChangeUsernameOnClickListener());
     }
 
     private void setUpRegisterUsername() {
         mTextView.setText(R.string.register_username);
+        mTextView.setTypeface(font);
+        mTextView.setTextColor(Color.parseColor("#ff000000"));
+        mTextView.setTextSize(20);
         mButton.setOnClickListener(new RegisterUsernameOnClickListener());
     }
 

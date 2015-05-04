@@ -17,7 +17,7 @@
      <!-- login activity -->
     <string name="register_username">Please register a username in order to use the app:</string>
     <string name="change_username">Change your username:</string>
-    <string name="accept_username">Confirm</string>
+    <string name="accept_username">" Confirm "</string>
     <string name="username_taken">That username has already been taken. Try another.</string>
     <string name="network_error">A network error occurred. Please check your internet connection and try again.</string>
     <string name="ok">Okay</string>
