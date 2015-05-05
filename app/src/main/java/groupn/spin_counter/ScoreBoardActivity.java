@@ -2,6 +2,7 @@ package groupn.spin_counter;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -34,6 +35,7 @@ public class ScoreBoardActivity extends ActionBarActivity {
     private DataRepository mDataRepository;
     private GestureDetector mGestureDetector;
     private Typeface font;
+    private int black;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +63,7 @@ public class ScoreBoardActivity extends ActionBarActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         view.setLayoutParams(params);
         getSupportActionBar().setCustomView(view);
+        black = Color.parseColor("#ff000000");
     }
 
     @Override
@@ -84,6 +87,19 @@ public class ScoreBoardActivity extends ActionBarActivity {
         mDataRepository.getLeaderboard(new DataRepository.Callback<List<User>>() {
             @Override
             public void success(List<User> users) {
+                //set font and color of first row
+                ((TextView)findViewById(R.id.row1_col1)).setTypeface(font);
+                ((TextView)findViewById(R.id.row1_col1)).setTextColor(black);
+                ((TextView)findViewById(R.id.row1_col2)).setTypeface(font);
+                ((TextView)findViewById(R.id.row1_col2)).setTextColor(black);
+                ((TextView)findViewById(R.id.row1_col3)).setTypeface(font);
+                ((TextView)findViewById(R.id.row1_col3)).setTextColor(black);
+                ((TextView)findViewById(R.id.row1_col4)).setTypeface(font);
+                ((TextView)findViewById(R.id.row1_col4)).setTextColor(black);
+                ((TextView)findViewById(R.id.row1_col5)).setTypeface(font);
+                ((TextView)findViewById(R.id.row1_col5)).setTextColor(black);
+                ((TextView)findViewById(R.id.row1_col6)).setTypeface(font);
+                ((TextView)findViewById(R.id.row1_col6)).setTextColor(black);
                 for (User user : users) {
                     TableRow tableRow = new TableRow (ScoreBoardActivity.this);
 
@@ -97,6 +113,8 @@ public class ScoreBoardActivity extends ActionBarActivity {
 
                     for (String attribute : attributes) {
                         TextView textView = new TextView (ScoreBoardActivity.this);
+                        textView.setTypeface(font);
+                        textView.setTextColor(black);
                         textView.setText (attribute);
                         tableRow.addView (textView);
                     }

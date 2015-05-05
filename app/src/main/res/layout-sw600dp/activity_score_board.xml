@@ -28,17 +28,23 @@
 
             <TableRow>
 
-                <TextView android:text="@string/score_board_name" />
+                <TextView android:text="@string/score_board_name"
+                    android:id="@+id/row1_col1"/>
 
-                <TextView android:text="@string/score_board_most_spins" />
+                <TextView android:text="@string/score_board_most_spins"
+                    android:id="@+id/row1_col2"/>
 
-                <TextView android:text="@string/score_board_games_played" />
+                <TextView android:text="@string/score_board_games_played"
+                    android:id="@+id/row1_col3"/>
 
-                <TextView android:text="@string/score_board_games_won" />
+                <TextView android:text="@string/score_board_games_won"
+                    android:id="@+id/row1_col4"/>
 
-                <TextView android:text="@string/score_board_games_lost" />
+                <TextView android:text="@string/score_board_games_lost"
+                    android:id="@+id/row1_col5"/>
 
-                <TextView android:text="@string/score_board_games_tied" />
+                <TextView android:text="@string/score_board_games_tied"
+                    android:id="@+id/row1_col6"/>
 
             </TableRow>
 
