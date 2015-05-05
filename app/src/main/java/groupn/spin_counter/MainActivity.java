@@ -31,10 +31,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.LinkedList;
+import java.util.List;
 
 import groupn.spin_counter.model.DataRepository;
 import groupn.spin_counter.model.User;
@@ -297,6 +302,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         updateHighScore();
         updateMuted();
         updateUsername();
+        checkGlobalHighScore();
     }
 
     private void updateMuted() {
@@ -321,8 +327,8 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         if(getSpinCounterApplication().getUser() != null)
             ((TextView)view.findViewById(R.id.mytext)).setText("  " + getSpinCounterApplication().getUser().username + " ");
         ((TextView)view.findViewById(R.id.mytext)).setTypeface(font);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         view.setLayoutParams(params);
         getSupportActionBar().setCustomView(view);
     }
@@ -448,6 +454,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mSpinCounter.stop();
         if(getSpinCounterApplication().getUser().maxSpins < mCurrentNumberOfSpins) {
             mHighScore.setText("Your Highscore: " + mCurrentNumberOfSpins);
+            checkGlobalHighScore(mCurrentNumberOfSpins);
         }
         mHighScore.setVisibility(View.VISIBLE);
         if (mInSpinSession) {
@@ -521,5 +528,52 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             DialogInterface.OnClickListener {
         public void onClick(DialogInterface dialog, int which) {
         }
+    }
+
+    private void checkGlobalHighScore(final int newScore) {
+        mDataRepository.getLeaderboard(new DataRepository.Callback<List<User>>() {
+            @Override
+            public void success(List<User> users) {
+                User top = users.get(0);
+                if(newScore > top.maxSpins){
+                    Log.d(TAG,"New Global Highscore");
+                    //TODO: ui element stating that user has highest global score
+                    findViewById(R.id.highest_score).setVisibility(View.VISIBLE);
+                    new AlertDialog.Builder(MainActivity.this, AlertDialog.THEME_DEVICE_DEFAULT_DARK).setTitle("NEW HIGHSCORE!")
+                            .setMessage("You now have the highest score in the world! Congratulations!")
+                            .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    //Do nothing
+                                }
+                            })
+                            .show();
+                }
+            }
+
+            @Override
+            public void failure(boolean networkError) {
+                Log.d(TAG, "failure to load leaderboard");
+                Toast.makeText(MainActivity.this, R.string.get_leaderboard_error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    private void checkGlobalHighScore() {
+        mDataRepository.getLeaderboard(new DataRepository.Callback<List<User>>() {
+            @Override
+            public void success(List<User> users) {
+                User top = users.get(0);
+                if(getSpinCounterApplication().getUser().username.equals(top.username)){
+                    Log.d(TAG,"You have highest score");
+                    findViewById(R.id.highest_score).setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void failure(boolean networkError) {
+                Log.d(TAG, "failure to load leaderboard");
+                Toast.makeText(MainActivity.this, R.string.get_leaderboard_error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

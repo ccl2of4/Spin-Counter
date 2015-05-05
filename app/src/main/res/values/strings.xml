@@ -34,6 +34,7 @@
     <string name="score_board_games_lost">Lost</string>
     <string name="score_board_games_tied">Tied</string>
     <string name="title_activity_nfcbrawl">Bluetooth Brawl</string>
+    <string name="get_leaderboard_error">Error: get leaderboard request failed</string>
 
     <!-- friends -->
     <string name="title_activity_friends">Friends</string>
