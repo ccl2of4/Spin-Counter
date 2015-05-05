@@ -71,6 +71,33 @@
     <string name="api_lvl">This phone has api lvl 15 which does not support setBackground method, thus the spin button will look rough</string>
     <string name="title_activity_login">LoginActivity</string>
 
+    <!-- SpinnerView -->
+    <string name="welcome">Welcome to Spin-Counter!</string>
+    <string name="welcome_text">"The goal of this game is to spin your phone \n"
+                        "on your finger or on a flat surface \n"
+                        "(screen facing up) as many times as you can!\n\n"
+                        "This screen is single player mode.\n"
+                        "Your spins here are recorded globally\n"
+                        "so you are competing against the world!\n\n"
+                        "In single player mode, the game ends if\n"
+                        "you either drop the phone or if it stops \n"
+                        "spinning for more than 2 seconds!\n"</string>
+    <string name="bt_text">"This takes you to 2 player mode.\n"
+                            "Bluetooth Brawl is a 2 player spin-off\n"
+                            "where the player with more spins wins.\n\n"
+                            "Additionally, you can swipe to get there\n"
+                            "instead of pressing the button"</string>
+    <string name="sb_text">"This takes you to the Leaderboard.\n"
+                            "It contains the global ranking of all players\n"
+                            "ranked by highest score.\n"
+                            "You can also swipe to get to this screen.\n\n"
+                            "Check to see where you stand in the rankings!"</string>
+    <string name="fb_text">"This takes you to the Friends List.\n"
+                            "You can subscribe to other players, which\n"
+                            "adds them to your friends list. From here,\n"
+                            "you can see their score and number of wins."</string>
+
+
     <string name="hello_world">Hello world!</string>
 
 </resources>

@@ -46,6 +46,10 @@ import groupn.spin_counter.model.DataRepository;
 import groupn.spin_counter.model.User;
 import groupn.spin_counter.view.SpinnerView;
 
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.Target;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
+
 
 public class MainActivity extends ActionBarActivity implements SpinCounter.SpinListener, SensorEventListener {
 
@@ -77,6 +81,8 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private int[] mPlayingIds;
 
     private View view;
+    private ShowcaseView sv;
+    private int whichView;
 
     // constants
     private static final int DISQUALIFICATION = 2500;
@@ -222,6 +228,57 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
 
         findSensors();
         updateUI();
+        SharedPreferences settings = getSharedPreferences("mprefs", 0);
+        if (settings.getBoolean("firstTime", true)) {
+            tutorial();
+            settings.edit().putBoolean("firstTime", false).commit();
+        }
+    }
+
+    private void tutorial(){
+        final Target bt = new ViewTarget(R.id.nfc_button, this);
+        final Target sb = new ViewTarget(R.id.scoreboard_button, this);
+        final Target fb = new ViewTarget(R.id.friends_button, this);
+        whichView = 0;
+
+        sv = new ShowcaseView.Builder(this, false)
+                .setTarget(Target.NONE)
+                .setContentTitle(R.string.welcome)
+                .setContentText(R.string.welcome_text)
+                .setStyle(5)
+                .build();
+        sv.setButtonText("OK.");
+        if (findViewById(R.id.main).getTag().equals("tablet_screen")) {
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.CENTER_HORIZONTAL);
+            params.addRule(RelativeLayout.CENTER_VERTICAL);
+            sv.setButtonPosition(params);
+        }
+        sv.overrideButtonClick(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(whichView==0) {
+                    sv.setShowcase(bt, true);
+                    sv.setContentTitle(getString(R.string.main_bluetooth));
+                    sv.setContentText(getString(R.string.bt_text));
+                }
+                if(whichView==1) {
+                    sv.setShowcase(sb, true);
+                    sv.setContentTitle(getString(R.string.title_activity_score_board));
+                    sv.setContentText(getString(R.string.sb_text));
+                }
+                if(whichView==2) {
+                    sv.setShowcase(fb, true);
+                    sv.setContentTitle(getString(R.string.title_activity_friends));
+                    sv.setContentText(getString(R.string.fb_text));
+                }
+                if(whichView==3){
+                    sv.hide();
+                }
+                whichView++;
+            }
+        });
     }
 
     private SpinCounterApplication getSpinCounterApplication () {
@@ -414,6 +471,9 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         switch (id) {
             case R.id.change_username:
                 goToLoginActivity(LoginActivity.PURPOSE_CHANGE_USERNAME);
+                return true;
+            case R.id.tutorial:
+                tutorial();
                 return true;
         }
         return false;

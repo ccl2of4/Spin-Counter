@@ -6,4 +6,7 @@
         android:title="Change Username"
         app:showAsAction="ifRoom"
         android:icon="@drawable/username"/>
+    <item android:id="@+id/tutorial"
+        android:title="Help!"
+        app:showAsAction="never"/>
 </menu>

@@ -38,6 +38,15 @@ public class SpinCounterApplication extends Application {
         savePreferences();
     }
 
+    /* first time global state */
+    public boolean isFirstTime () {
+        return mIsFirstTime;
+    }
+    public void setFirstTime (boolean t) {
+        mIsFirstTime = t;
+        savePreferences();
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -60,6 +69,7 @@ public class SpinCounterApplication extends Application {
         e.putBoolean(MUTED_KEY, mMuted);
         e.putString(USER_KEY, mUser.serialize());
         e.putBoolean(SERVER_KEY, mServer);
+        e.putBoolean(FIRST_KEY,mIsFirstTime);
 
         e.apply();
     }
@@ -70,10 +80,12 @@ public class SpinCounterApplication extends Application {
     private static final String PREFERENCES_NAME = "sc_prefs";
     private static final String TAG = "SpinCounterApplication";
     private static final String SERVER_KEY = "server";
+    private static final String FIRST_KEY="firstTime";
 
     // i-vars
     private User mUser;
     private boolean mMuted;
     private SharedPreferences mPrefs;
     private boolean mServer;
+    private boolean mIsFirstTime;
 }
