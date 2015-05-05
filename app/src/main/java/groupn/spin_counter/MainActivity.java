@@ -75,6 +75,8 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private int[] mSoundIds;
     private int[] mPlayingIds;
 
+    private View view;
+
     // constants
     private static final int DISQUALIFICATION = 2500;
 
@@ -91,7 +93,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         //
         // =============
 
-        mDataRepository = DataRepository.getInstance(DataRepository.Type.Global, getApplicationContext ());
+        mDataRepository = DataRepository.getInstance(DataRepository.Type.Global, getApplicationContext());
 
         mSpinCounter = new SpinCounter(this);
         mInSpinSession = false;
@@ -124,38 +126,37 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mGestureDetector = new GestureDetector(this, new GestureListener());
 
         // fonts
-        ((TextView)findViewById(R.id.ui_separator)).setTypeface(font);
-        ((TextView)findViewById(R.id.highscore)).setTypeface(font);
-        ((TextView)findViewById(R.id.score)).setTypeface(font);
+        ((TextView) findViewById(R.id.ui_separator)).setTypeface(font);
+        ((TextView) findViewById(R.id.highscore)).setTypeface(font);
+        ((TextView) findViewById(R.id.score)).setTypeface(font);
 
         // score board button
-        mScoreBoardButton = (Button)findViewById (R.id.scoreboard_button);
+        mScoreBoardButton = (Button) findViewById(R.id.scoreboard_button);
         mScoreBoardButton.setTypeface(font);
-        mScoreBoardButton.setOnClickListener (new View.OnClickListener() {
+        mScoreBoardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mInSpinSession || mInCountdown) {
                     done();
                 }
                 startActivity(new Intent(MainActivity.this, ScoreBoardActivity.class));
-                overridePendingTransition(R.anim.push_left_in,R.anim.push_left_out);
+                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
             }
         });
 
         // bluetooth button
-        mNfcButton = (Button)findViewById (R.id.nfc_button);
+        mNfcButton = (Button) findViewById(R.id.nfc_button);
         mNfcButton.setTypeface(font);
-        mNfcButton.setOnClickListener (new View.OnClickListener() {
+        mNfcButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mInSpinSession || mInCountdown) {
                     done();
                 }
-                if( BluetoothAdapter.getDefaultAdapter() != null) {
+                if (BluetoothAdapter.getDefaultAdapter() != null) {
                     startActivity(new Intent(MainActivity.this, BluetoothBrawlActivity.class));
                     overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
-                }
-                else{
+                } else {
                     new AlertDialog.Builder(MainActivity.this, AlertDialog.THEME_DEVICE_DEFAULT_DARK).setTitle("No Bluetooth Detected")
                             .setMessage("This device doesn't have Bluetooth: 2-Player Brawling is disabled.")
                             .setNeutralButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -170,7 +171,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         });
 
         // friends button
-        mFriendsButton = (Button)findViewById (R.id.friends_button);
+        mFriendsButton = (Button) findViewById(R.id.friends_button);
         mFriendsButton.setTypeface(font);
         mFriendsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -181,7 +182,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         });
 
         // mute button
-        mMuteButton = (ImageButton)findViewById(R.id.mute_button);
+        mMuteButton = (ImageButton) findViewById(R.id.mute_button);
         mMuteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -192,17 +193,17 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         });
 
         // spinnerview
-        mSpinnerView = makeSpinnerView ();
+        mSpinnerView = makeSpinnerView();
         mSpinnerView.setCountdownListener(mCountdownListener);
-        ((RelativeLayout)findViewById(R.id.main)).addView(mSpinnerView);
+        ((RelativeLayout) findViewById(R.id.main)).addView(mSpinnerView);
 
         // score/high score
-        mScore = (TextView)findViewById(R.id.score);
-        mHighScore = (TextView)findViewById(R.id.highscore);
+        mScore = (TextView) findViewById(R.id.score);
+        mHighScore = (TextView) findViewById(R.id.highscore);
 
         // screen setup
-        if(findViewById(R.id.main).getTag().equals("large_screen")){
-            TextView title = (TextView)findViewById (R.id.textView);
+        if (findViewById(R.id.main).getTag().equals("large_screen")) {
+            TextView title = (TextView) findViewById(R.id.textView);
             title.setTypeface(font);
         }
 
@@ -212,14 +213,14 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         display.getSize(size);
         int width = size.x;
         int height = size.y;
-        Log.d("SCREEN SIZE", "WIDTH: " + width + " HEIGHT: "+ height);
-        if(width <= 520){
+        Log.d("SCREEN SIZE", "WIDTH: " + width + " HEIGHT: " + height);
+        if (width <= 520) {
             ((TextView) findViewById(R.id.ui_separator)).setText(R.string.dashed_line_short);
             ((TextView) findViewById(R.id.highscore)).setTextSize(35);
         }
 
         // rotate to landscape if necessary
-        if(findViewById(R.id.main).getTag().equals("tablet_screen")){
+        if (findViewById(R.id.main).getTag().equals("tablet_screen")) {
             if (getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE) {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
                 //finish();
@@ -323,10 +324,18 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     }
 
     private void updateUsername(){
-        View view = LayoutInflater.from(this).inflate(R.layout.abs_layout, null);
+        view = LayoutInflater.from(this).inflate(R.layout.abs_layout, null);
         if(getSpinCounterApplication().getUser() != null)
             ((TextView)view.findViewById(R.id.mytext)).setText("  " + getSpinCounterApplication().getUser().username + " ");
         ((TextView)view.findViewById(R.id.mytext)).setTypeface(font);
+        ImageView imageView = (ImageView)view.findViewById(R.id.highest_score);
+        imageView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Toast.makeText(MainActivity.this, R.string.top_player, Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         view.setLayoutParams(params);
