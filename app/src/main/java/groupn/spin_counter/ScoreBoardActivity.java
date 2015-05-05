@@ -2,13 +2,18 @@ package groupn.spin_counter;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Typeface;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -28,6 +33,7 @@ public class ScoreBoardActivity extends ActionBarActivity {
     private TableLayout mTableLayout;
     private DataRepository mDataRepository;
     private GestureDetector mGestureDetector;
+    private Typeface font;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +50,17 @@ public class ScoreBoardActivity extends ActionBarActivity {
         if(findViewById(R.id.scoreboard).getTag().equals("tablet_screen")){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
         }
+
+        font = Typeface.createFromAsset(getAssets(), "fonts/orangejuice.otf");
+
+        // customize action bar
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        View view = LayoutInflater.from(this).inflate(R.layout.abs_layout_score_board, null);
+        ((TextView)view.findViewById(R.id.mytext)).setTypeface(font);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        view.setLayoutParams(params);
+        getSupportActionBar().setCustomView(view);
     }
 
     @Override
