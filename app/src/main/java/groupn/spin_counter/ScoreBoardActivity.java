@@ -49,9 +49,6 @@ public class ScoreBoardActivity extends ActionBarActivity {
         populateTable ();
 
         mGestureDetector = new GestureDetector(this, new GestureListener());
-        if(findViewById(R.id.scoreboard).getTag().equals("tablet_screen")){
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
-        }
 
         font = Typeface.createFromAsset(getAssets(), "fonts/orangejuice.otf");
 

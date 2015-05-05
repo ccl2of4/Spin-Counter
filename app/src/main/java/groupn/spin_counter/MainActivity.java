@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.hardware.Sensor;
@@ -217,15 +218,6 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         if (width <= 520) {
             ((TextView) findViewById(R.id.ui_separator)).setText(R.string.dashed_line_short);
             ((TextView) findViewById(R.id.highscore)).setTextSize(35);
-        }
-
-        // rotate to landscape if necessary
-        if (findViewById(R.id.main).getTag().equals("tablet_screen")) {
-            if (getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE) {
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
-                //finish();
-                return;
-            }
         }
 
         findSensors();
@@ -585,4 +577,5 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             }
         });
     }
+
 }

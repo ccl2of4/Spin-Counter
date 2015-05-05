@@ -153,10 +153,6 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         ((TextView)findViewById (R.id.you_score)).setTypeface(font);
         ((TextView)findViewById (R.id.them_score)).setTypeface(font);
 
-        if(findViewById(R.id.bluetooth).getTag().equals("tablet_screen")){
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
-        }
-
         // handles text scaling down for smaller screens
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();

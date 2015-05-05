@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/friends"
     tools:context="groupn.spin_counter.FriendsActivity"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/holo_blue_dark"
-    android:tag="other_screen">
+    android:tag="tablet_screen">
 
     <ListView
         android:id="@+id/friends_list"
