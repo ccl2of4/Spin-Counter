@@ -468,6 +468,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mInCountdown = false;
         mScoreBoardButton.setVisibility(View.VISIBLE);
         mNfcButton.setVisibility(View.VISIBLE);
+        mFriendsButton.setVisibility(View.VISIBLE);
         mSpinnerView.reset();
         mSpinnerView.setRotation(0);
 
@@ -502,6 +503,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             mNfcButton.setVisibility(View.GONE);
             mScore.setVisibility(View.GONE);
             mHighScore.setVisibility(View.GONE);
+            mFriendsButton.setVisibility(View.GONE);
         }
     };
 

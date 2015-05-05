@@ -8,6 +8,29 @@
     android:background="@android:color/holo_blue_dark"
     android:tag="large_screen">
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView2"
+        android:src="@drawable/brawlbg"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/score"
+        android:layout_alignLeft="@+id/nfc_button"
+        android:layout_alignStart="@+id/nfc_button" />
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView3"
+        android:src="@drawable/b_brawlbg_l"
+        android:layout_alignParentBottom="true"
+        android:layout_alignLeft="@+id/imageView"
+        android:layout_alignStart="@+id/imageView"
+        android:layout_below="@+id/score"
+        android:layout_alignRight="@+id/highscore"
+        android:layout_alignEnd="@+id/highscore" />
+
     <View
         android:id="@+id/anchor"
         android:layout_width="0dp"

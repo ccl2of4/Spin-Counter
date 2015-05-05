@@ -200,6 +200,10 @@ public class LoginActivity extends ActionBarActivity {
                 final ProgressDialog progressDialog = ProgressDialog.show(LoginActivity.this, getString(R.string.verifying_credentials), null, true);
                 mDataRepository.changeUsername(mEditText.getText().toString(), new UsernameResultHandler(progressDialog));
             }
+            else{
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                startActivity(intent);
+            }
         }
     }
 
