@@ -63,7 +63,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private boolean mIsTiming;
     private Runnable mStopSession;
 
-    private Button mNfcButton, mScoreBoardButton;
+    private Button mNfcButton, mScoreBoardButton, mFriendsButton;
     private ImageButton mMuteButton;
 
     private SoundPool mSounds;
@@ -143,10 +143,10 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mNfcButton.setOnClickListener (new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (mInSpinSession || mInCountdown) {
+                    done();
+                }
                 if( BluetoothAdapter.getDefaultAdapter() != null) {
-                    if (mInSpinSession || mInCountdown) {
-                        done();
-                    }
                     startActivity(new Intent(MainActivity.this, BluetoothBrawlActivity.class));
                     overridePendingTransition(R.anim.push_right_in, R.anim.push_right_out);
                 }
@@ -161,6 +161,17 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
                             })
                             .show();
                 }
+            }
+        });
+
+        // friends button
+        mFriendsButton = (Button)findViewById (R.id.friends_button);
+        mFriendsButton.setTypeface(font);
+        mFriendsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, FriendsActivity.class));
+                overridePendingTransition(R.anim.abc_slide_in_top, R.anim.abc_slide_out_top);
             }
         });
 

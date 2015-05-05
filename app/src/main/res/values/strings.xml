@@ -13,6 +13,7 @@
     <string name="dashed_line_normal">-------------------------</string>
     <string name="dashed_line_short">----------------------</string>
     <string name="synchronize_failure">Error synchronizing data with server. Check your network connection.</string>
+    <string name="main_friends">Friends</string>
 
      <!-- login activity -->
     <string name="register_username">Please register a username in order to use the app:</string>
@@ -32,6 +33,13 @@
     <string name="score_board_games_lost">Lost</string>
     <string name="score_board_games_tied">Tied</string>
     <string name="title_activity_nfcbrawl">Bluetooth Brawl</string>
+
+    <!-- friends -->
+    <string name="title_activity_friends">Friends</string>
+    <string name="max_spins_label">Max Spins: </string>
+    <string name="games_won_label">Games Won: </string>
+    <string name="title_add_friend">Add Friend</string>
+    <string name="toast_failure">Could not add friend</string>
 
     <!--  BluetoothChat -->
     <string name="send">Send</string>

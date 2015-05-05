@@ -46,6 +46,23 @@
         android:paddingLeft="5dp"
         android:paddingRight="5dp" />
 
+    <Button
+        android:id="@+id/friends_button"
+        android:text="@string/main_friends"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_skin"
+        android:elegantTextHeight="false"
+        android:layout_below="@+id/scoreboard_button"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentRight="false"
+        android:layout_marginTop="20dp"
+        android:textSize="20dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"/>
+
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="115dp"

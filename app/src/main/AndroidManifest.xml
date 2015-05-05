@@ -33,6 +33,11 @@
             android:screenOrientation="sensorPortrait" >
         </activity>
         <activity
+            android:name=".FriendsActivity"
+            android:label="@string/title_activity_friends"
+            android:screenOrientation="sensorPortrait" >
+        </activity>
+        <activity
             android:name=".bluetooth.DeviceListActivity"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/select_device"
