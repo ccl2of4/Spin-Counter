@@ -2,17 +2,23 @@ package groupn.spin_counter;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -34,6 +40,8 @@ public class FriendsActivity extends ActionBarActivity {
     private List<User> mLatestResults;
 
     private ArrayAdapter<String> mAdapter;
+    private int black;
+    private Typeface font;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +53,18 @@ public class FriendsActivity extends ActionBarActivity {
         mDataRepository = DataRepository.getInstance (DataRepository.Type.Global, getApplicationContext ());
 
         mUserListView = (ListView) findViewById(R.id.friends_list);
+
+        font = Typeface.createFromAsset(getAssets(), "fonts/orangejuice.otf");
+
+        // customize action bar
+        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        View view = LayoutInflater.from(this).inflate(R.layout.abs_layout_friends, null);
+        ((TextView)view.findViewById(R.id.mytext)).setTypeface(font);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        view.setLayoutParams(params);
+        getSupportActionBar().setCustomView(view);
+        black = Color.parseColor("#ff000000");
 
         populateList ();
     }
@@ -195,6 +215,12 @@ public class FriendsActivity extends ActionBarActivity {
                 return true;
         }
         return false;
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.abc_slide_in_bottom, R.anim.abc_slide_out_top);
     }
 
 }
