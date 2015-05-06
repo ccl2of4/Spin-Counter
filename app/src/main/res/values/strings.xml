@@ -102,7 +102,10 @@
     <string name="bt_text3">"You can pick from 5 different game modes:\n"
                         "Each higher level decreases the amount of\n"
                         "time you have to spin. The options are:\n"
-                        "unlimited, 10s, 5s, 2.5s, and 1.5s"</string>
+                        "unlimited, 10s, 5s, 2.5s, and 1.5s\n\n"
+                        "Click on this icon to change difficulties\n"
+                        "This can only be done by the player who\n"
+                        "initiates a brawl."</string>
     <string name="sb_text">"This takes you to the Leaderboard.\n"
                             "It contains the global ranking of all players\n"
                             "ranked by highest score.\n"

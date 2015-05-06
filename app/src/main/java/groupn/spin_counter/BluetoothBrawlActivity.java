@@ -28,12 +28,14 @@ import android.text.method.DigitsKeyListener;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -122,6 +124,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     private static final int lvl5 = 1500;
     private boolean myTurn;
     private int whichView;
+    private View view;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,7 +132,8 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         setContentView(R.layout.activity_nfcbrawl);
 
         // hide activity name on actionbar
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        //getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayOptions(android.support.v7.app.ActionBar.DISPLAY_SHOW_CUSTOM);
 
         //instantiate score manager
         mDataRepository = DataRepository.getInstance(DataRepository.Type.Global, getApplicationContext());
@@ -191,6 +195,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         }
 
         mMode = getSpinCounterApplication().getMode();
+        updateModeIcon();
         myTurn = false;
     }
 
@@ -225,6 +230,35 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
                 whichView++;
             }
         });
+    }
+
+    public void updateModeIcon(){
+        view = LayoutInflater.from(this).inflate(R.layout.abs_layout_bt, null);
+        ImageView imageView = (ImageView)view.findViewById(R.id.lvl_icon);
+
+        if(mMode == 1)
+            imageView.setImageResource(R.drawable.lvl1);
+        else if(mMode ==lvl2)
+            imageView.setImageResource(R.drawable.lvl2);
+        else if(mMode ==lvl3)
+            imageView.setImageResource(R.drawable.lvl3);
+        else if(mMode ==lvl4)
+            imageView.setImageResource(R.drawable.lvl4);
+        else if(mMode ==lvl5)
+            imageView.setImageResource(R.drawable.lvl5);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!isServer & !mIsTiming & myTurn)
+                    pickMode();
+                else
+                    Toast.makeText(BluetoothBrawlActivity.this, R.string.cant_pick, Toast.LENGTH_SHORT).show();
+            }
+        });
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        view.setLayoutParams(params);
+        getSupportActionBar().setCustomView(view);
     }
 
     @Override
@@ -298,12 +332,6 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
                 return true;
             case R.id.tutorial2:
                 tutorial();
-                return true;
-            case R.id.mode:
-                if(!isServer & !mIsTiming & myTurn)
-                    pickMode();
-                else
-                    Toast.makeText(this, R.string.cant_pick, Toast.LENGTH_SHORT).show();
                 return true;
         }
         return false;
@@ -540,22 +568,27 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
                     case 0:
                         mMode = 1;
                         sendMessage(MODE_CODE+mMode);
+                        updateModeIcon();
                         break;
                     case 1:
                         mMode = lvl2;
                         sendMessage(MODE_CODE+mMode);
+                        updateModeIcon();
                         break;
                     case 2:
                         mMode = lvl3;
                         sendMessage(MODE_CODE+mMode);
+                        updateModeIcon();
                         break;
                     case 3:
                         mMode = lvl4;
                         sendMessage(MODE_CODE+mMode);
+                        updateModeIcon();
                         break;
                     case 4:
                         mMode = lvl5;
                         sendMessage(MODE_CODE+mMode);
+                        updateModeIcon();
                         break;
                 }
             }
@@ -593,6 +626,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         else if(msg.startsWith(MODE_CODE)){
             Log.d(TAG,"Setting Mode");
             mMode = Integer.parseInt(msg.substring(2));
+            updateModeIcon();
         }
     }
 
