@@ -15,6 +15,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
@@ -79,6 +80,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     private SoundPool mSounds;
     private int[] mSoundIds;
     private int[] mPlayingIds;
+    private MediaPlayer mp;
 
     private View view;
     private ShowcaseView sv;
@@ -112,6 +114,9 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         mPlayingIds = new int[3];
         mSoundIds[0] = mSounds.load(this, R.raw.countdown, 1);
         mSoundIds[1] = mSounds.load(this, R.raw.swoosh, 1);
+
+        //if (!getSpinCounterApplication().isMuted())
+           // playSound(getApplicationContext(), R.raw.music);
 
         mTimeChecker = new Handler();
         mIsTiming = false;
@@ -234,6 +239,19 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             settings.edit().putBoolean("firstTime", false).commit();
         }
     }
+
+    public void playSound(Context context, int soundID){
+        mp = MediaPlayer.create(context, soundID);
+        mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            public void onPrepared(MediaPlayer mp) {
+                mp.setLooping(true);
+                mp.start();
+            }
+        });
+        //mp.start();
+    }
+
+
 
     private void tutorial(){
         final Target bt = new ViewTarget(R.id.nfc_button, this);
@@ -359,12 +377,40 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
         if (getSpinCounterApplication().isMuted()) {
             mSounds.autoPause();
             mMuteButton.setImageResource(R.drawable.mute);
+            if(mp != null) {
+                mp.stop();
+                mp.release();
+                mp = null;
+            }
         } else {
             mSounds.autoResume();
             mMuteButton.setImageResource(R.drawable.unmute);
+            if(mp!=null){
+                Log.d(TAG, "MUSIC IS NOT NULL");
+                if(!mp.isPlaying()){
+                    //mp.start();
+                    //playSound(getApplicationContext(), R.raw.music);
+                }
+            }
+            else{
+                Log.d(TAG, "MUSIC WAS NULL, NEW OBJECT");
+                playSound(getApplicationContext(), R.raw.music);
+            }
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(mp!=null)
+        {
+            if(mp.isPlaying()){
+                mp.stop();
+                mp.release();
+                mp=null;
+            }
+        }
+    }
     private void updateHighScore () {
         User user = getSpinCounterApplication().getUser();
         if (user != null) {
@@ -402,6 +448,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
     @Override
     public void onResume(){
         super.onResume();
+        Log.d(TAG,"RESUMING");
         mScore.setVisibility(View.GONE);
     }
 
