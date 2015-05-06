@@ -93,6 +93,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     private static String START_CODE = "1:";
     private static String DONE_CODE = "2:";
     private static String USER_CODE = "3:";
+    private static String MODE_CODE = "4:";
 
     //score result variables
     private int mEnemyScore = -1;
@@ -114,7 +115,13 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     private Handler mTimeChecker;
     private boolean mIsTiming;
     private Runnable mStopSession;
-    private static final int DISQUALIFICATION = 10000;
+    private int mMode;
+    private static final int lvl2 = 10000;
+    private static final int lvl3 = 5000;
+    private static final int lvl4 = 2500;
+    private static final int lvl5 = 1500;
+    private boolean myTurn;
+    private int whichView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -182,9 +189,14 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
             tutorial();
             settings.edit().putBoolean("firstTimeBT", false).commit();
         }
+
+        mMode = getSpinCounterApplication().getMode();
+        myTurn = false;
     }
 
     private void tutorial(){
+        final Target bt = new ViewTarget(R.id.anchor2, this);
+        whichView = 0;
         sv = new ShowcaseView.Builder(this, false)
                 .setTarget(Target.NONE)
                 .setContentTitle(R.string.main_bluetooth)
@@ -199,6 +211,20 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
             params.addRule(RelativeLayout.CENTER_VERTICAL);
             sv.setButtonPosition(params);
         }
+        sv.overrideButtonClick(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(whichView==0) {
+                    sv.setShowcase(bt, true);
+                    sv.setContentTitle(getString(R.string.main_bluetooth));
+                    sv.setContentText(getString(R.string.bt_text3));
+                }
+                if(whichView==2) {
+                    sv.hide();
+                }
+                whichView++;
+            }
+        });
     }
 
     @Override
@@ -272,6 +298,12 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
                 return true;
             case R.id.tutorial2:
                 tutorial();
+                return true;
+            case R.id.mode:
+                if(!isServer & !mIsTiming & myTurn)
+                    pickMode();
+                else
+                    Toast.makeText(this, R.string.cant_pick, Toast.LENGTH_SHORT).show();
                 return true;
         }
         return false;
@@ -443,6 +475,8 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
                             isServer = getSpinCounterApplication().ismServer();
                             if(!isServer) {
                                 Log.d(TAG, "isClient");
+                                myTurn = true;
+                                pickMode();
                                 mSpinnerView.setEnabled(true);
                             }
                             sendUser();
@@ -492,6 +526,44 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         }
     };
 
+    private void pickMode(){
+        AlertDialog.Builder b = new AlertDialog.Builder(this, AlertDialog.THEME_DEVICE_DEFAULT_DARK);
+        b.setTitle("Pick a difficulty for your game!");
+        String[] types = {"Too Easy", "Casual", "Just Right", "Too Pro", "Literally Impossible"};
+        b.setItems(types, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.dismiss();
+                switch(which){
+                    case 0:
+                        mMode = 1;
+                        sendMessage(MODE_CODE+mMode);
+                        break;
+                    case 1:
+                        mMode = lvl2;
+                        sendMessage(MODE_CODE+mMode);
+                        break;
+                    case 2:
+                        mMode = lvl3;
+                        sendMessage(MODE_CODE+mMode);
+                        break;
+                    case 3:
+                        mMode = lvl4;
+                        sendMessage(MODE_CODE+mMode);
+                        break;
+                    case 4:
+                        mMode = lvl5;
+                        sendMessage(MODE_CODE+mMode);
+                        break;
+                }
+            }
+
+        });
+
+        b.show();
+    }
     private void sendUser(){
         sendMessage(USER_CODE + getSpinCounterApplication().getUser().serialize());
     }
@@ -499,6 +571,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         if(msg.startsWith(START_CODE)){
             Log.d(TAG, "Starting");
             mSpinnerView.setEnabled(true);
+            myTurn = true;
             Toast.makeText(BluetoothBrawlActivity.this, "YOUR TURN! GO!", Toast.LENGTH_SHORT).show();
         }
         else if(msg.startsWith(DONE_CODE)){
@@ -508,6 +581,7 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
             if(!isServer){
                 mSpinnerView.setEnabled(true);
                 sendMessage(DONE_CODE + mMyScore);
+                myTurn = true;
             }
             reportResult();
         }
@@ -515,6 +589,10 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
             Log.d(TAG,"Enemy User");
             mEnemy = User.deserialize(msg.substring(2));
             Log.d(TAG, mEnemy.username + " " + mEnemy.macAddress);
+        }
+        else if(msg.startsWith(MODE_CODE)){
+            Log.d(TAG,"Setting Mode");
+            mMode = Integer.parseInt(msg.substring(2));
         }
     }
 
@@ -572,13 +650,15 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
             mSpinCounter.stop();
             mSpinnerView.reset();
             mSpinnerView.setRotation(0);
+            myTurn = false;
             if (mIsTiming) {
                 Log.d(TAG,"CANCEL TIMER");
                 mTimeChecker.removeCallbacks(mStopSession);
                 mIsTiming = false;
             }
-            if(!isServer)
+            if(!isServer) {
                 sendMessage(START_CODE);
+            }
             else {
                 sendMessage(DONE_CODE + mCurrentNumberOfSpins);
             }
@@ -618,7 +698,8 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
                         mSpinListener.done();
                     }
                 };
-                mTimeChecker.postDelayed(mStopSession, DISQUALIFICATION);
+                if(mMode != 1)
+                    mTimeChecker.postDelayed(mStopSession, mMode);
                 mSpinCounter.start();
             }
         }

@@ -47,6 +47,15 @@ public class SpinCounterApplication extends Application {
         savePreferences();
     }
 
+    /* mode global state */
+    public int getMode () {
+        return mMode;
+    }
+    public void setMode (int m) {
+        mMode = m;
+        savePreferences();
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -61,6 +70,7 @@ public class SpinCounterApplication extends Application {
 
         mMuted = mPrefs.getBoolean(MUTED_KEY, false);
         mUser = User.deserialize(mPrefs.getString(USER_KEY, null));
+        mMode = mPrefs.getInt(MODE_KEY, 1);
     }
 
     private void savePreferences () {
@@ -70,6 +80,7 @@ public class SpinCounterApplication extends Application {
         e.putString(USER_KEY, mUser.serialize());
         e.putBoolean(SERVER_KEY, mServer);
         e.putBoolean(FIRST_KEY,mIsFirstTime);
+        e.putInt(MODE_KEY,mMode);
 
         e.apply();
     }
@@ -81,6 +92,7 @@ public class SpinCounterApplication extends Application {
     private static final String TAG = "SpinCounterApplication";
     private static final String SERVER_KEY = "server";
     private static final String FIRST_KEY="firstTime";
+    private static final String MODE_KEY="mode";
 
     // i-vars
     private User mUser;
@@ -88,4 +100,5 @@ public class SpinCounterApplication extends Application {
     private SharedPreferences mPrefs;
     private boolean mServer;
     private boolean mIsFirstTime;
+    private int mMode;
 }

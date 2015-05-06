@@ -24,6 +24,12 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_centerInParent="true" />
+        <View
+            android:id="@+id/anchor2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true" />
 
         <TextView
             android:layout_width="match_parent"
