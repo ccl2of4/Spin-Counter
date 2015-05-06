@@ -111,7 +111,10 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
     private User mEnemy;
 
     private ShowcaseView sv;
-    private int whichView;
+    private Handler mTimeChecker;
+    private boolean mIsTiming;
+    private Runnable mStopSession;
+    private static final int DISQUALIFICATION = 10000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,6 +155,9 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         isServer=true;
         getSpinCounterApplication().setmServer(true);
         Log.d(TAG,"isServer");
+
+        mTimeChecker = new Handler();
+        mIsTiming = false;
 
         mGestureDetector = new GestureDetector(this, new GestureListener());
 
@@ -566,6 +572,11 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
             mSpinCounter.stop();
             mSpinnerView.reset();
             mSpinnerView.setRotation(0);
+            if (mIsTiming) {
+                Log.d(TAG,"CANCEL TIMER");
+                mTimeChecker.removeCallbacks(mStopSession);
+                mIsTiming = false;
+            }
             if(!isServer)
                 sendMessage(START_CODE);
             else {
@@ -598,7 +609,18 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         }
         @Override
         public void countdownFinished() {
-            mSpinCounter.start();
+            if (!mIsTiming) {
+                mIsTiming = true;
+                mStopSession = new Runnable() {
+                    @Override
+                    public void run() {
+                        mIsTiming = false;
+                        mSpinListener.done();
+                    }
+                };
+                mTimeChecker.postDelayed(mStopSession, DISQUALIFICATION);
+                mSpinCounter.start();
+            }
         }
     };
 
