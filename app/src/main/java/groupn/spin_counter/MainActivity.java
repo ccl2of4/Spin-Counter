@@ -248,7 +248,7 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
                 .setStyle(5)
                 .build();
         sv.setButtonText("OK.");
-        if (findViewById(R.id.main).getTag().equals("tablet_screen")) {
+        if (findViewById(R.id.main).getTag().equals("tablet_screen") || findViewById(R.id.main).getTag().equals("large_screen")) {
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
             params.addRule(RelativeLayout.CENTER_HORIZONTAL);
