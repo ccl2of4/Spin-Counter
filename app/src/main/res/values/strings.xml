@@ -87,6 +87,17 @@
                             "where the player with more spins wins.\n\n"
                             "Additionally, you can swipe to get there\n"
                             "instead of pressing the button"</string>
+    <string name="bt_text2">"Welcome to Bluetooth Brawl!\n"
+                        "The goal here is to get more spins than\n"
+                        "the other player.\n\n"
+                        "To connect to another player, one of you\n"
+                        "must search and the other must be found.\n\n"
+                        "To search, press the visible bluetooth\n"
+                        "button on the actionbar. The other player\n"
+                        "must make their device discoverable by\n"
+                        "clicking "Make discoverable" in the settings.\n"
+                        "You can also choose the length of time which\n"
+                        "your device stays discoverable."</string>
     <string name="sb_text">"This takes you to the Leaderboard.\n"
                             "It contains the global ranking of all players\n"
                             "ranked by highest score.\n"

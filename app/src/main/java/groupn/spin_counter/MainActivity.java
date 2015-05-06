@@ -624,9 +624,11 @@ public class MainActivity extends ActionBarActivity implements SpinCounter.SpinL
             @Override
             public void success(List<User> users) {
                 User top = users.get(0);
-                if(getSpinCounterApplication().getUser().username.equals(top.username)){
-                    Log.d(TAG,"You have highest score");
-                    findViewById(R.id.highest_score).setVisibility(View.VISIBLE);
+                if(getSpinCounterApplication().getUser() != null) {
+                    if (getSpinCounterApplication().getUser().username.equals(top.username)) {
+                        Log.d(TAG, "You have highest score");
+                        findViewById(R.id.highest_score).setVisibility(View.VISIBLE);
+                    }
                 }
             }
 

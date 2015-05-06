@@ -31,11 +31,16 @@ import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.Target;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 import org.w3c.dom.Text;
 
@@ -105,6 +110,9 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
 
     private User mEnemy;
 
+    private ShowcaseView sv;
+    private int whichView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -162,6 +170,28 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
         Log.d("SCREEN SIZE", "WIDTH: " + width + " HEIGHT: "+ height);
         if(width < 540){
             ((TextView) findViewById(R.id.textView)).setTextSize(40);
+        }
+        SharedPreferences settings = getSharedPreferences("mprefs", 0);
+        if (settings.getBoolean("firstTimeBT", true)) {
+            tutorial();
+            settings.edit().putBoolean("firstTimeBT", false).commit();
+        }
+    }
+
+    private void tutorial(){
+        sv = new ShowcaseView.Builder(this, false)
+                .setTarget(Target.NONE)
+                .setContentTitle(R.string.main_bluetooth)
+                .setContentText(R.string.bt_text2)
+                .setStyle(5)
+                .build();
+        sv.setButtonText("OK.");
+        if (findViewById(R.id.bluetooth).getTag().equals("tablet_screen") || findViewById(R.id.bluetooth).getTag().equals("large_screen")) {
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            params.addRule(RelativeLayout.CENTER_HORIZONTAL);
+            params.addRule(RelativeLayout.CENTER_VERTICAL);
+            sv.setButtonPosition(params);
         }
     }
 
@@ -233,6 +263,9 @@ public class BluetoothBrawlActivity extends ActionBarActivity {
             }
             case R.id.discoverable_length:
                 showDialog(DIALOG_ALERT);
+                return true;
+            case R.id.tutorial2:
+                tutorial();
                 return true;
         }
         return false;

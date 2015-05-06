@@ -29,5 +29,8 @@
         android:id="@+id/discoverable"
         app:showAsAction="never"
         android:title="@string/discoverable"/>
+    <item android:id="@+id/tutorial2"
+        android:title="Help!"
+        app:showAsAction="never"/>
 
 </menu>
